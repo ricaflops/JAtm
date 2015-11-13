@@ -30,6 +30,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+/**
+ * .TAP file format for JAtm
+ * @author Ricardo F. Lopes
+ */
 public class JatmFileTap extends JatmFile {
     public JatmFileTap() {
         extension = "tap";
@@ -56,7 +60,7 @@ public class JatmFileTap extends JatmFile {
             // Load the Header Block
             blockLength = getWord(buffer, index); // Header TAP block length
             byte[] header = new byte[blockLength+1];
-            header[0] = JaTape.HEADER_BLOCK; // Fix Header block type            
+            header[0] = JaTapeBlock.HEADER_BLOCK; // Fix Header block type            
             System.arraycopy(buffer, index+2, header, 1, blockLength);            
 
             index += blockLength + 2; // advance buffer pointer to next block
@@ -64,7 +68,7 @@ public class JatmFileTap extends JatmFile {
             // Load the Data Block
             blockLength = getWord(buffer, index); // Data TAP block length
             byte[] data = new byte[blockLength+1];
-            data[0] = JaTape.DATA_BLOCK; // Fix Data block type           
+            data[0] = JaTapeBlock.DATA_BLOCK; // Fix Data block type           
             System.arraycopy(buffer, index+2, data, 1, blockLength);
             
             index += blockLength + 2; // advance buffer pointer to next block 

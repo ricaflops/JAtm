@@ -26,6 +26,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+/**
+ * .JAC Jupiter Ace file format for JAtm
+ * @author Ricardo F. Lopes
+ */
 public class JatmFileJac extends JatmFile {
     public JatmFileJac() {
         extension = "jac";

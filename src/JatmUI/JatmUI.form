@@ -297,7 +297,7 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="viewCharactersActionPerformed"/>
               </Events>
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="viewInfo">
+            <MenuItem class="javax.swing.JMenuItem" name="viewInspect">
               <Properties>
                 <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
                   <KeyStroke key="Alt+I"/>
@@ -306,26 +306,50 @@
                   <Image iconType="3" name="/JatmUI/resources/View.png"/>
                 </Property>
                 <Property name="mnemonic" type="int" value="73"/>
-                <Property name="text" type="java.lang.String" value="Info.."/>
-                <Property name="toolTipText" type="java.lang.String" value="Show file details"/>
+                <Property name="text" type="java.lang.String" value="Inspect Content.."/>
+                <Property name="toolTipText" type="java.lang.String" value="View file Contents"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="viewInfoActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="viewInspectActionPerformed"/>
               </Events>
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="viewCode">
+            <MenuItem class="javax.swing.JMenuItem" name="viewMap">
               <Properties>
                 <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
-                  <KeyStroke key="Alt+D"/>
+                  <KeyStroke key="Alt+M"/>
                 </Property>
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                   <Image iconType="3" name="/JatmUI/resources/script.png"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Code.."/>
-                <Property name="toolTipText" type="java.lang.String" value="Show file code"/>
+                <Property name="text" type="java.lang.String" value="Memory Map.."/>
+                <Property name="toolTipText" type="java.lang.String" value="View Memory Map"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="viewCodeActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="viewMapActionPerformed"/>
+              </Events>
+            </MenuItem>
+          </SubComponents>
+        </Menu>
+        <Menu class="javax.swing.JMenu" name="Setup">
+          <Properties>
+            <Property name="mnemonic" type="int" value="83"/>
+            <Property name="text" type="java.lang.String" value="Setup"/>
+          </Properties>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="wavSaveSetup">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="WAV Save.."/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="wavSaveSetupActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="wavLoadSetup">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="WAV Load.."/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="wavLoadSetupActionPerformed"/>
               </Events>
             </MenuItem>
           </SubComponents>
@@ -341,11 +365,23 @@
                 <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
                   <KeyStroke key="Shift+F1"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Jupiter Ace Archive Site"/>
+                <Property name="text" type="java.lang.String" value="Jupiter Ace Resource Archive"/>
+                <Property name="toolTipText" type="java.lang.String" value="www.jupiter-ace.co.uk"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="JARsiteActionPerformed"/>
               </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="JAtmSourceCode">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="JAtm source code"/>
+                <Property name="toolTipText" type="java.lang.String" value="JAtm source code at GitHub repository"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="JAtmSourceCodeActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator3">
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="about">
               <Properties>
@@ -357,7 +393,7 @@
                 </Property>
                 <Property name="mnemonic" type="int" value="65"/>
                 <Property name="text" type="java.lang.String" value="About JAtm.."/>
-                <Property name="toolTipText" type="java.lang.String" value="About JAtm"/>
+                <Property name="toolTipText" type="java.lang.String" value=""/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="aboutActionPerformed"/>
@@ -485,7 +521,7 @@
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                   <Image iconType="3" name="/JatmUI/resources/tag_blue_edit.png"/>
                 </Property>
-                <Property name="toolTipText" type="java.lang.String" value="Edit file name"/>
+                <Property name="toolTipText" type="java.lang.String" value="Edit name"/>
                 <Property name="focusable" type="boolean" value="false"/>
                 <Property name="horizontalTextPosition" type="int" value="0"/>
                 <Property name="verticalTextPosition" type="int" value="3"/>
@@ -499,7 +535,7 @@
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                   <Image iconType="3" name="/JatmUI/resources/cross.png"/>
                 </Property>
-                <Property name="toolTipText" type="java.lang.String" value="Remove file from list"/>
+                <Property name="toolTipText" type="java.lang.String" value="Remove from list"/>
                 <Property name="focusable" type="boolean" value="false"/>
                 <Property name="horizontalTextPosition" type="int" value="0"/>
                 <Property name="verticalTextPosition" type="int" value="3"/>
@@ -515,7 +551,7 @@
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                   <Image iconType="3" name="/JatmUI/resources/Display.png"/>
                 </Property>
-                <Property name="toolTipText" type="java.lang.String" value="View file data as screen"/>
+                <Property name="toolTipText" type="java.lang.String" value="View as screen"/>
                 <Property name="focusable" type="boolean" value="false"/>
                 <Property name="horizontalTextPosition" type="int" value="0"/>
                 <Property name="verticalTextPosition" type="int" value="3"/>
@@ -529,7 +565,7 @@
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                   <Image iconType="3" name="/JatmUI/resources/game.png"/>
                 </Property>
-                <Property name="toolTipText" type="java.lang.String" value="View file data as character set"/>
+                <Property name="toolTipText" type="java.lang.String" value="View as character set"/>
                 <Property name="focusable" type="boolean" value="false"/>
                 <Property name="horizontalTextPosition" type="int" value="0"/>
                 <Property name="verticalTextPosition" type="int" value="3"/>
@@ -538,35 +574,35 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="viewCharactersActionPerformed"/>
               </Events>
             </Component>
-            <Component class="javax.swing.JButton" name="infoButton">
+            <Component class="javax.swing.JButton" name="inspectButton">
               <Properties>
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                   <Image iconType="3" name="/JatmUI/resources/View.png"/>
                 </Property>
-                <Property name="toolTipText" type="java.lang.String" value="View file details"/>
+                <Property name="toolTipText" type="java.lang.String" value="Inspect File Contents"/>
                 <Property name="focusable" type="boolean" value="false"/>
                 <Property name="horizontalTextPosition" type="int" value="0"/>
                 <Property name="verticalTextPosition" type="int" value="3"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="viewInfoActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="viewInspectActionPerformed"/>
               </Events>
               <AuxValues>
                 <AuxValue name="JavaCodeGenerator_SerializeTo" type="java.lang.String" value="disassembleActionPerformed"/>
               </AuxValues>
             </Component>
-            <Component class="javax.swing.JButton" name="codeButton">
+            <Component class="javax.swing.JButton" name="mapButton">
               <Properties>
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                   <Image iconType="3" name="/JatmUI/resources/script.png"/>
                 </Property>
-                <Property name="toolTipText" type="java.lang.String" value="Disassemble file code"/>
+                <Property name="toolTipText" type="java.lang.String" value="View Memory Map"/>
                 <Property name="focusable" type="boolean" value="false"/>
                 <Property name="horizontalTextPosition" type="int" value="0"/>
                 <Property name="verticalTextPosition" type="int" value="3"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="viewCodeActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="viewMapActionPerformed"/>
               </Events>
             </Component>
           </SubComponents>

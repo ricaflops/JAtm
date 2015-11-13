@@ -31,6 +31,10 @@ import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
 import java.util.List;
 
+/**
+ * .HEX Intel Hex file format for JAtm
+ * @author Ricardo F. Lopes
+ */
 public class JatmFileHex extends JatmFileBin {
     public JatmFileHex() {
         extension = "hex";

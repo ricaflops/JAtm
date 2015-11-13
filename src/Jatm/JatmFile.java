@@ -24,6 +24,10 @@ package Jatm;
 import java.nio.file.Path;
 import java.util.List;
 
+/**
+ * Base class for different file formats supported by JAtm
+ * @author Ricardo F. Lopes
+ */
 public abstract class JatmFile {
     protected String extension;
     protected String description;

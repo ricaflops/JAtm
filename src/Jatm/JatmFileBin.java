@@ -26,6 +26,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+/**
+ * .BIN Binary file format for JAtm
+ * @author Ricardo
+ */
 public class JatmFileBin extends JatmFile {
 
     public JatmFileBin() {
@@ -37,7 +41,7 @@ public class JatmFileBin extends JatmFile {
         // Build Data Block
         int length = (bin.length < 0x10000) ? bin.length : 0xFFFF;
         byte[] dataBlock = new byte[length+2];           // create data block
-        dataBlock[0] = JaTape.DATA_BLOCK;                // set Block Type
+        dataBlock[0] = JaTapeBlock.DATA_BLOCK;                // set Block Type
         System.arraycopy(bin, 0, dataBlock, 1, length);  // fill data
 
         // Create a proper tape file name from disk file name

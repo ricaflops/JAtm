@@ -19,13 +19,11 @@
  */
 package JatmUI;
 
-import Jatm.JaDisasm;
 import Jatm.JaTape;
 
-public class ViewCodeDialog extends javax.swing.JDialog {
+public class ViewMapDialog extends javax.swing.JDialog {
 
     private final JaTape tape;
-    private final JaDisasm forthDisasm;
 
     /**
      * Creates new form DisasmDialog
@@ -33,49 +31,14 @@ public class ViewCodeDialog extends javax.swing.JDialog {
      * @param modal
      * @param t
      */
-    public ViewCodeDialog(java.awt.Frame parent, boolean modal, JaTape t) {
+    public ViewMapDialog(java.awt.Frame parent, boolean modal, JaTape t) {
         super(parent, modal);
-        tape = t;
-        forthDisasm = new JaDisasm(t);
-        initComponents();
-        this.setTitle("Code [" + tape.getFilename() + "]" );
-        printContents();
-        printCode();
-    }
-
-    public final void printContents() {
-        // Write File Info
-        if (tape.isDict()) {
-            ContentsTextArea.append("Dict: ");
-        } else {
-            ContentsTextArea.append("Byt: ");
-        }
-        ContentsTextArea.append(tape.getFilename() + " ( "
-            + tape.getParameter(JaTape.LENGTH) + " bytes "
-            + String.format("at %04Xh )", tape.getParameter(JaTape.ADDRESS)) + "\n");
-        if (tape.isDict()) {
-            ContentsTextArea.append("----- " + forthDisasm.vocSize() + " words -----\n");
-            ContentsTextArea.append(forthDisasm.vlist());
-        }
-        ContentsTextArea.setEditable(false);  // Avoid user editing
-        ContentsTextArea.setCaretPosition(0); // move to top of text  
-    }
-    
-    public final void printCode() {    
-        // Disassemble
-        if (tape.isDict()) {
-            CodeTextArea.append(forthDisasm.decode());
-        } else {
-            CodeTextArea.append("; Jupiter Ace Binary File \""
-                    + tape.getFilename() + "\"\n\n");
-            CodeTextArea.append("        .org    "
-                    + String.format("%04Xh", tape.getParameter(JaTape.ADDRESS)) + "\n");
-            CodeTextArea.append("*** Z80 Disassembler not implemented ***\n");
-        }
-
         
-        CodeTextArea.setEditable(false);  // Avoid user editing
-        CodeTextArea.setCaretPosition(0); // move to top of text         
+        tape = t;
+        
+        initComponents();
+        
+        this.setTitle("Memory Map of " + tape.getFilename());
     }
     
     /**
@@ -87,28 +50,27 @@ public class ViewCodeDialog extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        TabbedPane = new javax.swing.JTabbedPane();
-        ContentsScrollPane = new javax.swing.JScrollPane();
-        ContentsTextArea = new javax.swing.JTextArea();
-        CodeScrollPane = new javax.swing.JScrollPane();
-        CodeTextArea = new javax.swing.JTextArea();
+        MapPanel = new MemMapPanel(tape);
         CloseButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Code View");
         setLocationByPlatform(true);
+        setMinimumSize(new java.awt.Dimension(310, 250));
+        setPreferredSize(new java.awt.Dimension(310, 250));
 
-        ContentsTextArea.setColumns(20);
-        ContentsTextArea.setRows(5);
-        ContentsScrollPane.setViewportView(ContentsTextArea);
+        MapPanel.setPreferredSize(new java.awt.Dimension(300, 200));
 
-        TabbedPane.addTab("Vocabulary", ContentsScrollPane);
-
-        CodeTextArea.setColumns(20);
-        CodeTextArea.setRows(5);
-        CodeScrollPane.setViewportView(CodeTextArea);
-
-        TabbedPane.addTab("Code", CodeScrollPane);
+        javax.swing.GroupLayout MapPanelLayout = new javax.swing.GroupLayout(MapPanel);
+        MapPanel.setLayout(MapPanelLayout);
+        MapPanelLayout.setHorizontalGroup(
+            MapPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        MapPanelLayout.setVerticalGroup(
+            MapPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 205, Short.MAX_VALUE)
+        );
 
         CloseButton.setMnemonic('C');
         CloseButton.setText("Close");
@@ -122,19 +84,17 @@ public class ViewCodeDialog extends javax.swing.JDialog {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(TabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 390, Short.MAX_VALUE))
+            .addComponent(MapPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 328, Short.MAX_VALUE)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(234, Short.MAX_VALUE)
                 .addComponent(CloseButton, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(TabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 260, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(MapPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 205, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(CloseButton)
                 .addContainerGap())
         );
@@ -148,10 +108,6 @@ public class ViewCodeDialog extends javax.swing.JDialog {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton CloseButton;
-    private javax.swing.JScrollPane CodeScrollPane;
-    private javax.swing.JTextArea CodeTextArea;
-    private javax.swing.JScrollPane ContentsScrollPane;
-    private javax.swing.JTextArea ContentsTextArea;
-    private javax.swing.JTabbedPane TabbedPane;
+    private javax.swing.JPanel MapPanel;
     // End of variables declaration//GEN-END:variables
 }
