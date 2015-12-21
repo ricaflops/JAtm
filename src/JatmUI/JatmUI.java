@@ -53,7 +53,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Ricardo F. Lopes
  */
 public class JatmUI extends javax.swing.JFrame {
-    public static final String version = "0.6";
+    public static final String version = "0.7";
     
     List<JaTape> jaTapeList;                    // Tape Files List
     JaTapeListTableModel tapeListTableModel;    // GUI List Table

@@ -19,7 +19,7 @@
  */
 package JatmUI;
 
-import Jatm.JatmFileWav;
+import Jatm.JatmWaveSave;
 
 public class SaveWavParamsDialog extends javax.swing.JDialog {
 
@@ -37,23 +37,32 @@ public class SaveWavParamsDialog extends javax.swing.JDialog {
     // Populate dialog with current values
     private void initValues() {
         // Get Sample Rate: 22050, 44100, 48000 Hz
-        switch(JatmFileWav.getSaveSampleRate()) {
-            case 8000:
-                sampleRateComboBox.setSelectedIndex(0);
-                break;
+        switch(JatmWaveSave.getSampleRate()) {
             case 22050:
-                sampleRateComboBox.setSelectedIndex(1);
+                sampleRateComboBox.setSelectedIndex(0); // 22050
                 break;
             case 48000:
-                sampleRateComboBox.setSelectedIndex(3);
+                sampleRateComboBox.setSelectedIndex(2); // 48000
                 break;
-            default: sampleRateComboBox.setSelectedIndex(2);
-        }    
-     
-        // Channels Usage
-        stereoRadioButton.setSelected(JatmFileWav.isSaveStereo());
+            default: sampleRateComboBox.setSelectedIndex(1); // 44100
+        }
+        // Get Sample Size: 8, 16, 24, 32 bits
+        switch(JatmWaveSave.getBits()) {
+            case 8:
+                bitsComboBox.setSelectedIndex(0); // 8 bits
+                break;
+            case 24:
+                bitsComboBox.setSelectedIndex(2); // 24 bits
+                break;
+            case 32:
+                bitsComboBox.setSelectedIndex(3); // 32 bits
+                break;
+            default: bitsComboBox.setSelectedIndex(1); // 16 bits
+        }  
+        // Get Channels: mono or stereo
+        stereoRadioButton.setSelected(JatmWaveSave.isStereo());
         // Get Volume: 0-100%
-        volumeSlider.setValue(JatmFileWav.getSaveVolume());
+        volumeSlider.setValue(JatmWaveSave.getLevel());
     }
     
     /**
@@ -75,8 +84,6 @@ public class SaveWavParamsDialog extends javax.swing.JDialog {
         okButton = new javax.swing.JButton();
         cancelButton = new javax.swing.JButton();
         sampleRateComboBox = new javax.swing.JComboBox();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
         bitsComboBox = new javax.swing.JComboBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -85,7 +92,7 @@ public class SaveWavParamsDialog extends javax.swing.JDialog {
 
         volumePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Volume"));
 
-        volumeSlider.setMajorTickSpacing(50);
+        volumeSlider.setMajorTickSpacing(20);
         volumeSlider.setMinorTickSpacing(10);
         volumeSlider.setOrientation(javax.swing.JSlider.VERTICAL);
         volumeSlider.setPaintLabels(true);
@@ -98,11 +105,13 @@ public class SaveWavParamsDialog extends javax.swing.JDialog {
         volumePanel.setLayout(volumePanelLayout);
         volumePanelLayout.setHorizontalGroup(
             volumePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(volumeSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGroup(volumePanelLayout.createSequentialGroup()
+                .addComponent(volumeSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         volumePanelLayout.setVerticalGroup(
             volumePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(volumeSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+            .addComponent(volumeSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         channelPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Channels"));
@@ -119,11 +128,8 @@ public class SaveWavParamsDialog extends javax.swing.JDialog {
         channelPanel.setLayout(channelPanelLayout);
         channelPanelLayout.setHorizontalGroup(
             channelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(channelPanelLayout.createSequentialGroup()
-                .addGroup(channelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(monoRadioButton)
-                    .addComponent(stereoRadioButton))
-                .addGap(0, 8, Short.MAX_VALUE))
+            .addComponent(monoRadioButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(stereoRadioButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         channelPanelLayout.setVerticalGroup(
             channelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -159,14 +165,11 @@ public class SaveWavParamsDialog extends javax.swing.JDialog {
             }
         });
 
-        sampleRateComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "8000 Hz", "22050 Hz", "44100 Hz", "48000 Hz" }));
-        sampleRateComboBox.setToolTipText("");
-
-        jLabel1.setText("Sample Rate");
-
-        jLabel2.setText("Sample Size");
+        sampleRateComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "22050 Hz", "44100 Hz", "48000 Hz" }));
+        sampleRateComboBox.setToolTipText("Sampling Rate");
 
         bitsComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "8 bits", "16 bits", "24 bits", "32 bits" }));
+        bitsComboBox.setToolTipText("Sample Size");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -175,45 +178,34 @@ public class SaveWavParamsDialog extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(volumePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(okButton, javax.swing.GroupLayout.DEFAULT_SIZE, 77, Short.MAX_VALUE)
-                    .addComponent(channelPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(10, 10, 10)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(bitsComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(sampleRateComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(defaultButton, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(sampleRateComboBox, 0, 77, Short.MAX_VALUE)
+                    .addComponent(defaultButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(bitsComboBox, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(okButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(cancelButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(channelPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(volumePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(channelPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(defaultButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(channelPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel1)
-                            .addComponent(sampleRateComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(sampleRateComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel2)
-                            .addComponent(bitsComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(cancelButton)
-                            .addComponent(okButton))))
+                        .addComponent(bitsComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(defaultButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(okButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(cancelButton))
+                    .addComponent(volumePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -225,31 +217,42 @@ public class SaveWavParamsDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_cancelButtonActionPerformed
 
     private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonActionPerformed
-        // identify selected Sample Rate
-        int sr;
+        // Set Sample Rate
         switch (sampleRateComboBox.getSelectedIndex()) {
             case 0:
-                sr = 8000;
+                JatmWaveSave.setSampleRate(22050);
                 break;
-            case 1:
-                sr = 22050;
-                break;
-            case 3:
-                sr = 48000;
+            case 2:
+                JatmWaveSave.setSampleRate(48000);
                 break;        
             default:
-                sr = 44100;                
+                JatmWaveSave.setSampleRate(44100);                
         }
-        JatmFileWav.setSaveSampleRate(sr); // Set Sample Rate
-        JatmFileWav.setSaveStereo(stereoRadioButton.isSelected()); // Set Channel Usage
-        JatmFileWav.setSaveVolume(volumeSlider.getValue()); // Set Volume: 0-100%
+        // Set Sample Size in Bits
+        switch (bitsComboBox.getSelectedIndex()) {
+            case 0:
+                JatmWaveSave.setBits(8);
+                break;
+            case 2:
+                JatmWaveSave.setBits(24);
+                break;
+            case 3:
+                JatmWaveSave.setBits(32);
+                break;        
+            default:
+                JatmWaveSave.setBits(16);                
+        }
+        JatmWaveSave.setStereo(stereoRadioButton.isSelected()); // Set Channel Usage
+        JatmWaveSave.setLevel(volumeSlider.getValue()); // Set Volume: 0-100%
 
         this.setVisible(false);
     }//GEN-LAST:event_okButtonActionPerformed
 
     private void defaultButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_defaultButtonActionPerformed
-        JatmFileWav.setSaveDefault();
-        initValues(); // Populate dialog values again
+        sampleRateComboBox.setSelectedIndex(1); // Sample Rate 44100 Hz
+        monoRadioButton.setSelected(true);      // Mono
+        bitsComboBox.setSelectedIndex(1);       // 16 bits
+        volumeSlider.setValue(90);              // Volume = 90%
     }//GEN-LAST:event_defaultButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -258,8 +261,6 @@ public class SaveWavParamsDialog extends javax.swing.JDialog {
     private javax.swing.JPanel channelPanel;
     private javax.swing.ButtonGroup channelsRateGroup;
     private javax.swing.JButton defaultButton;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JRadioButton monoRadioButton;
     private javax.swing.JButton okButton;
     private javax.swing.JComboBox sampleRateComboBox;

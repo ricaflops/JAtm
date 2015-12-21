@@ -19,7 +19,7 @@
  */
 package JatmUI;
 
-import Jatm.JatmFileWav;
+import Jatm.JatmWaveLoad;
 
 /**
  *
@@ -33,10 +33,27 @@ public class LoadWavParamsDialog extends javax.swing.JDialog {
     public LoadWavParamsDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-        
-        
+        initValues();
     }
 
+    private void initValues() {
+        levelSlider.setValue(JatmWaveLoad.getLevelOption()); // Level
+        histeresysSlider.setValue(JatmWaveLoad.getHisteresysOption()); // Histeresys
+        inverseCheckBox.setSelected(JatmWaveLoad.getInverseOption()); // Inverse
+        filterCheckBox.setSelected(JatmWaveLoad.getFilterOption()); // Filter
+        // Channels
+        switch(JatmWaveLoad.getChannelOption()) {
+            case 1:
+                chLeftRadioButton.setSelected(true);
+                break;
+            case 2:
+                chRightRadioButton.setSelected(true);
+                break;
+            default:
+                chLeftRightRadioButton.setSelected(true);
+        }
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -53,7 +70,7 @@ public class LoadWavParamsDialog extends javax.swing.JDialog {
         histeresysSlider = new javax.swing.JSlider();
         inverseCheckBox = new javax.swing.JCheckBox();
         filterCheckBox = new javax.swing.JCheckBox();
-        autoButton = new javax.swing.JButton();
+        defaultButton = new javax.swing.JButton();
         okButton = new javax.swing.JButton();
         cancelButton = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
@@ -67,67 +84,59 @@ public class LoadWavParamsDialog extends javax.swing.JDialog {
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Level %"));
 
-        levelSlider.setMajorTickSpacing(50);
+        levelSlider.setMajorTickSpacing(20);
         levelSlider.setMinimum(-100);
-        levelSlider.setMinorTickSpacing(10);
+        levelSlider.setMinorTickSpacing(5);
         levelSlider.setOrientation(javax.swing.JSlider.VERTICAL);
         levelSlider.setPaintLabels(true);
         levelSlider.setPaintTicks(true);
-        levelSlider.setValue(0);
+        levelSlider.setToolTipText("Detection Level");
+        levelSlider.setValue(5);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(levelSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+            .addComponent(levelSlider, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 86, Short.MAX_VALUE)
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addComponent(levelSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+            .addComponent(levelSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Histeresys %"));
 
-        histeresysSlider.setMajorTickSpacing(5);
+        histeresysSlider.setMajorTickSpacing(2);
         histeresysSlider.setMaximum(10);
         histeresysSlider.setMinorTickSpacing(1);
         histeresysSlider.setOrientation(javax.swing.JSlider.VERTICAL);
         histeresysSlider.setPaintLabels(true);
         histeresysSlider.setPaintTicks(true);
-        histeresysSlider.setValue(2);
+        histeresysSlider.setToolTipText("Histeresys Level");
+        histeresysSlider.setValue(1);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(histeresysSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addComponent(histeresysSlider, javax.swing.GroupLayout.DEFAULT_SIZE, 92, Short.MAX_VALUE)
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addComponent(histeresysSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 20, Short.MAX_VALUE))
+            .addComponent(histeresysSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         inverseCheckBox.setMnemonic('I');
         inverseCheckBox.setText("Inverse");
 
         filterCheckBox.setMnemonic('F');
-        filterCheckBox.setText("Filter");
+        filterCheckBox.setText("LP Filter");
 
-        autoButton.setMnemonic('A');
-        autoButton.setText("Automatic");
-        autoButton.addActionListener(new java.awt.event.ActionListener() {
+        defaultButton.setMnemonic('A');
+        defaultButton.setText("Default");
+        defaultButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                autoButtonActionPerformed(evt);
+                defaultButtonActionPerformed(evt);
             }
         });
 
@@ -163,12 +172,9 @@ public class LoadWavParamsDialog extends javax.swing.JDialog {
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(chLeftRadioButton)
-                    .addComponent(chLeftRightRadioButton)
-                    .addComponent(chRightRadioButton)))
+            .addComponent(chLeftRightRadioButton, javax.swing.GroupLayout.DEFAULT_SIZE, 89, Short.MAX_VALUE)
+            .addComponent(chLeftRadioButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(chRightRadioButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -186,17 +192,18 @@ public class LoadWavParamsDialog extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(filterCheckBox)
-                    .addComponent(inverseCheckBox)
-                    .addComponent(autoButton, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(defaultButton, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(okButton, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(filterCheckBox, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(inverseCheckBox, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -208,15 +215,15 @@ public class LoadWavParamsDialog extends javax.swing.JDialog {
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(inverseCheckBox)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(filterCheckBox)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(autoButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(defaultButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(okButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(cancelButton)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -229,24 +236,39 @@ public class LoadWavParamsDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_cancelButtonActionPerformed
 
     private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonActionPerformed
+        JatmWaveLoad.setLevelOption(levelSlider.getValue()); // Level
+        JatmWaveLoad.setHisteresysOption(histeresysSlider.getValue()); // Histeresys
+        JatmWaveLoad.setInverseOption(inverseCheckBox.isSelected()); // Inverse
+        JatmWaveLoad.setFilterOption(filterCheckBox.isSelected()); // Filter
+        // Channels
+        if(chLeftRightRadioButton.isSelected()) { // Left + Right
+            JatmWaveLoad.setChannelOption(0);
+        }
+        if(chLeftRadioButton.isSelected()) { // Left
+            JatmWaveLoad.setChannelOption(1);
+        }        
+        if(chRightRadioButton.isSelected()) { // Right
+            JatmWaveLoad.setChannelOption(2);
+        }
+        
         dispose();
     }//GEN-LAST:event_okButtonActionPerformed
 
-    private void autoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_autoButtonActionPerformed
-        dispose();
-    }//GEN-LAST:event_autoButtonActionPerformed
-
-public void set(JatmFileWav wav) {
-    
-}
+    private void defaultButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_defaultButtonActionPerformed
+        levelSlider.setValue(5); // Level
+        histeresysSlider.setValue(1); // Histeresys
+        inverseCheckBox.setSelected(false); // Inverse
+        filterCheckBox.setSelected(false); // Filter
+        chLeftRightRadioButton.setSelected(true); // Channels
+    }//GEN-LAST:event_defaultButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton autoButton;
     private javax.swing.JButton cancelButton;
     private javax.swing.JRadioButton chLeftRadioButton;
     private javax.swing.JRadioButton chLeftRightRadioButton;
     private javax.swing.JRadioButton chRightRadioButton;
     private javax.swing.ButtonGroup channelGroup;
+    private javax.swing.JButton defaultButton;
     private javax.swing.JCheckBox filterCheckBox;
     private javax.swing.JSlider histeresysSlider;
     private javax.swing.JCheckBox inverseCheckBox;

@@ -31,17 +31,19 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jPanel2" min="-2" pref="98" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
+              <Component id="jPanel2" min="-2" max="-2" attributes="0"/>
+              <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="jPanel3" min="-2" max="-2" attributes="0"/>
-              <EmptySpace type="separate" max="-2" attributes="0"/>
+              <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jPanel1" alignment="0" min="-2" max="-2" attributes="0"/>
-                  <Component id="filterCheckBox" min="-2" max="-2" attributes="0"/>
-                  <Component id="inverseCheckBox" min="-2" max="-2" attributes="0"/>
-                  <Component id="autoButton" min="-2" pref="107" max="-2" attributes="0"/>
+                  <Component id="defaultButton" min="-2" pref="107" max="-2" attributes="0"/>
                   <Component id="okButton" min="-2" pref="107" max="-2" attributes="0"/>
                   <Component id="cancelButton" min="-2" pref="107" max="-2" attributes="0"/>
+                  <Group type="103" alignment="0" groupAlignment="1" max="-2" attributes="0">
+                      <Component id="filterCheckBox" alignment="0" max="32767" attributes="0"/>
+                      <Component id="inverseCheckBox" alignment="0" max="32767" attributes="0"/>
+                      <Component id="jPanel1" alignment="0" max="32767" attributes="0"/>
+                  </Group>
               </Group>
               <EmptySpace max="32767" attributes="0"/>
           </Group>
@@ -56,15 +58,15 @@
                   <Component id="jPanel2" alignment="0" max="32767" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="jPanel1" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="inverseCheckBox" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="filterCheckBox" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                      <Component id="autoButton" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="defaultButton" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace type="unrelated" max="32767" attributes="0"/>
                       <Component id="okButton" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="cancelButton" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -86,32 +88,26 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" alignment="1" attributes="0">
-                  <EmptySpace max="32767" attributes="0"/>
-                  <Component id="levelSlider" min="-2" pref="72" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
-              </Group>
+              <Component id="levelSlider" alignment="1" pref="86" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" alignment="0" attributes="0">
-                  <Component id="levelSlider" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-              </Group>
+              <Component id="levelSlider" alignment="0" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
       </Layout>
       <SubComponents>
         <Component class="javax.swing.JSlider" name="levelSlider">
           <Properties>
-            <Property name="majorTickSpacing" type="int" value="50"/>
+            <Property name="majorTickSpacing" type="int" value="20"/>
             <Property name="minimum" type="int" value="-100"/>
-            <Property name="minorTickSpacing" type="int" value="10"/>
+            <Property name="minorTickSpacing" type="int" value="5"/>
             <Property name="orientation" type="int" value="1"/>
             <Property name="paintLabels" type="boolean" value="true"/>
             <Property name="paintTicks" type="boolean" value="true"/>
-            <Property name="value" type="int" value="0"/>
+            <Property name="toolTipText" type="java.lang.String" value="Detection Level"/>
+            <Property name="value" type="int" value="5"/>
           </Properties>
         </Component>
       </SubComponents>
@@ -128,32 +124,26 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" alignment="0" attributes="0">
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="histeresysSlider" min="-2" pref="72" max="-2" attributes="0"/>
-                  <EmptySpace max="32767" attributes="0"/>
-              </Group>
+              <Component id="histeresysSlider" alignment="0" pref="92" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" alignment="0" attributes="0">
-                  <Component id="histeresysSlider" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace min="0" pref="20" max="32767" attributes="0"/>
-              </Group>
+              <Component id="histeresysSlider" alignment="0" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
       </Layout>
       <SubComponents>
         <Component class="javax.swing.JSlider" name="histeresysSlider">
           <Properties>
-            <Property name="majorTickSpacing" type="int" value="5"/>
+            <Property name="majorTickSpacing" type="int" value="2"/>
             <Property name="maximum" type="int" value="10"/>
             <Property name="minorTickSpacing" type="int" value="1"/>
             <Property name="orientation" type="int" value="1"/>
             <Property name="paintLabels" type="boolean" value="true"/>
             <Property name="paintTicks" type="boolean" value="true"/>
-            <Property name="value" type="int" value="2"/>
+            <Property name="toolTipText" type="java.lang.String" value="Histeresys Level"/>
+            <Property name="value" type="int" value="1"/>
           </Properties>
         </Component>
       </SubComponents>
@@ -167,16 +157,16 @@
     <Component class="javax.swing.JCheckBox" name="filterCheckBox">
       <Properties>
         <Property name="mnemonic" type="int" value="70"/>
-        <Property name="text" type="java.lang.String" value="Filter"/>
+        <Property name="text" type="java.lang.String" value="LP Filter"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JButton" name="autoButton">
+    <Component class="javax.swing.JButton" name="defaultButton">
       <Properties>
         <Property name="mnemonic" type="int" value="65"/>
-        <Property name="text" type="java.lang.String" value="Automatic"/>
+        <Property name="text" type="java.lang.String" value="Default"/>
       </Properties>
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="autoButtonActionPerformed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="defaultButtonActionPerformed"/>
       </Events>
     </Component>
     <Component class="javax.swing.JButton" name="okButton">
@@ -209,14 +199,9 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" attributes="0">
-                  <EmptySpace max="32767" attributes="0"/>
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="chLeftRadioButton" min="-2" max="-2" attributes="0"/>
-                      <Component id="chLeftRightRadioButton" alignment="0" min="-2" max="-2" attributes="0"/>
-                      <Component id="chRightRadioButton" alignment="0" min="-2" max="-2" attributes="0"/>
-                  </Group>
-              </Group>
+              <Component id="chLeftRightRadioButton" pref="89" max="32767" attributes="0"/>
+              <Component id="chLeftRadioButton" max="32767" attributes="0"/>
+              <Component id="chRightRadioButton" alignment="1" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
