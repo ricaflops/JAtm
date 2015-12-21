@@ -112,19 +112,20 @@ public class JatmUI extends javax.swing.JFrame {
         initComponents();
         
         setTitle("JAtm - version " + version);
-        setIconImage(jatmIcon.getImage());   
+        setIconImage(jatmIcon.getImage());
+         statusBarRightText.setText("Java runtime v" + System.getProperty("java.version"));
     }
     
     // Right Text on Status Bar: shows the number of tape files in list
-    private void setStatusBarRight(int files) {
+    private void setStatusBarLeft(int files) {
         if(files == 0) {
-            statusBarRightText.setText("No files");
+            statusBarLeftText.setText("No Tape files");
             return;
         }
         if(files > 1) {
-            statusBarRightText.setText(files + " files");
+            statusBarLeftText.setText(files + " Tape files");
         } else{
-            statusBarRightText.setText("One file");
+            statusBarLeftText.setText("One Tape file");
         }
     }
     
@@ -731,7 +732,7 @@ public class JatmUI extends javax.swing.JFrame {
             tapeListTableModel.fireTableDataChanged(); // refresh table draw
             this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         }
-        setStatusBarRight(jaTapeList.size());
+        setStatusBarLeft(jaTapeList.size());
     }//GEN-LAST:event_loadFileActionPerformed
 
     private void exitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitActionPerformed
@@ -769,10 +770,9 @@ public class JatmUI extends javax.swing.JFrame {
     +"along with this program.  If not, see <http://www.gnu.org/licenses/>.\n\n"              
                 
                 +"JAtm includes or uses:\n"
-                +"- Silk Icon Set http://www.famfamfam.com/lab/icon/\n\n"
-                +"Java runtime version: " + System.getProperty("java.version"),
+                +"- Silk Icon Set http://www.famfamfam.com/lab/icon/\n\n",
                 "About JAtm",
-                JOptionPane.INFORMATION_MESSAGE, icon);
+                JOptionPane.INFORMATION_MESSAGE, icon);       
     }//GEN-LAST:event_aboutActionPerformed
 
     private void editNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editNameActionPerformed
@@ -828,7 +828,7 @@ public class JatmUI extends javax.swing.JFrame {
             if(action == JOptionPane.OK_OPTION) {
                 jaTapeList.clear();
                 tapeListTableModel.fireTableDataChanged(); // refresh table draw
-                setStatusBarRight(jaTapeList.size());
+                setStatusBarLeft(jaTapeList.size());
             }
         }
     }//GEN-LAST:event_clearListActionPerformed
@@ -954,7 +954,7 @@ public class JatmUI extends javax.swing.JFrame {
             }
             tapeListTable.clearSelection();
             tapeListTableModel.fireTableDataChanged(); // refresh table draw
-            setStatusBarRight(jaTapeList.size()); // Update Status Bar
+            setStatusBarLeft(jaTapeList.size()); // Update Status Bar
         } else {
             msgNoSelectionError(); // No files selected Error
         }
@@ -1051,7 +1051,7 @@ public class JatmUI extends javax.swing.JFrame {
                     "Save Error: Unknow Format",
                     JOptionPane.ERROR_MESSAGE);
         }
-        setStatusBarRight(jaTapeList.size());
+        setStatusBarLeft(jaTapeList.size());
     }//GEN-LAST:event_saveFileActionPerformed
 
     private void viewCharactersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewCharactersActionPerformed
