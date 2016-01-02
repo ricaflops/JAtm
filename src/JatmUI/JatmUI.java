@@ -29,6 +29,7 @@ import Jatm.JatmFile;
 import Jatm.JatmFileWav;
 import java.awt.Cursor;
 import java.awt.Desktop;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -44,6 +45,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.JTable;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileFilter;
@@ -53,7 +55,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Ricardo F. Lopes
  */
 public class JatmUI extends javax.swing.JFrame {
-    public static final String version = "0.7";
+    public static final String version = "0.8";
     
     List<JaTape> jaTapeList;                    // Tape Files List
     JaTapeListTableModel tapeListTableModel;    // GUI List Table
@@ -128,7 +130,7 @@ public class JatmUI extends javax.swing.JFrame {
             statusBarLeftText.setText("One Tape file");
         }
     }
-    
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -147,10 +149,10 @@ public class JatmUI extends javax.swing.JFrame {
         renameButton = new javax.swing.JButton();
         removeButton = new javax.swing.JButton();
         jSeparator6 = new javax.swing.JToolBar.Separator();
-        screenButton = new javax.swing.JButton();
-        charactersButton = new javax.swing.JButton();
         inspectButton = new javax.swing.JButton();
         mapButton = new javax.swing.JButton();
+        screenButton = new javax.swing.JButton();
+        charactersButton = new javax.swing.JButton();
         statusBar = new javax.swing.JPanel();
         statusBarLeftText = new javax.swing.JLabel();
         statusBarRightText = new javax.swing.JLabel();
@@ -166,7 +168,6 @@ public class JatmUI extends javax.swing.JFrame {
         Edit = new javax.swing.JMenu();
         editName = new javax.swing.JMenuItem();
         editAttributes = new javax.swing.JMenuItem();
-        fixCrc = new javax.swing.JMenuItem();
         jSeparator7 = new javax.swing.JPopupMenu.Separator();
         selectAllMenuItem = new javax.swing.JMenuItem();
         selectNoneMenuItem = new javax.swing.JMenuItem();
@@ -177,15 +178,19 @@ public class JatmUI extends javax.swing.JFrame {
         moveDown = new javax.swing.JMenuItem();
         moveBottom = new javax.swing.JMenuItem();
         jSeparator8 = new javax.swing.JPopupMenu.Separator();
+        duplicate = new javax.swing.JMenuItem();
         removeItem = new javax.swing.JMenuItem();
         View = new javax.swing.JMenu();
-        viewScreen = new javax.swing.JMenuItem();
-        viewCharacters = new javax.swing.JMenuItem();
         viewInspect = new javax.swing.JMenuItem();
         viewMap = new javax.swing.JMenuItem();
+        viewScreen = new javax.swing.JMenuItem();
+        viewCharacters = new javax.swing.JMenuItem();
         Setup = new javax.swing.JMenu();
-        wavSaveSetup = new javax.swing.JMenuItem();
         wavLoadSetup = new javax.swing.JMenuItem();
+        wavSaveSetup = new javax.swing.JMenuItem();
+        toolsMenu = new javax.swing.JMenu();
+        compare = new javax.swing.JMenuItem();
+        fixCrc = new javax.swing.JMenuItem();
         Help = new javax.swing.JMenu();
         JARsite = new javax.swing.JMenuItem();
         JAtmSourceCode = new javax.swing.JMenuItem();
@@ -200,7 +205,7 @@ public class JatmUI extends javax.swing.JFrame {
         toolBar.setRollover(true);
 
         newButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/page_white.png"))); // NOI18N
-        newButton.setToolTipText("Discard all loaded files");
+        newButton.setToolTipText("Clear List");
         newButton.setFocusable(false);
         newButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         newButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -212,7 +217,7 @@ public class JatmUI extends javax.swing.JFrame {
         toolBar.add(newButton);
 
         loadButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/folder.png"))); // NOI18N
-        loadButton.setToolTipText("Load file(s)");
+        loadButton.setToolTipText("Load File(s)");
         loadButton.setFocusable(false);
         loadButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         loadButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -224,7 +229,7 @@ public class JatmUI extends javax.swing.JFrame {
         toolBar.add(loadButton);
 
         saveButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/disk.png"))); // NOI18N
-        saveButton.setToolTipText("Save selected files");
+        saveButton.setToolTipText("Save Selected File(s)");
         saveButton.setFocusable(false);
         saveButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         saveButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -237,7 +242,7 @@ public class JatmUI extends javax.swing.JFrame {
         toolBar.add(jSeparator4);
 
         renameButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/tag_blue_edit.png"))); // NOI18N
-        renameButton.setToolTipText("Edit name");
+        renameButton.setToolTipText("Edit File Name");
         renameButton.setFocusable(false);
         renameButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         renameButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -249,7 +254,7 @@ public class JatmUI extends javax.swing.JFrame {
         toolBar.add(renameButton);
 
         removeButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/cross.png"))); // NOI18N
-        removeButton.setToolTipText("Remove from list");
+        removeButton.setToolTipText("Remove File(s) From List");
         removeButton.setFocusable(false);
         removeButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         removeButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -261,32 +266,8 @@ public class JatmUI extends javax.swing.JFrame {
         toolBar.add(removeButton);
         toolBar.add(jSeparator6);
 
-        screenButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/Display.png"))); // NOI18N
-        screenButton.setToolTipText("View as screen");
-        screenButton.setFocusable(false);
-        screenButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        screenButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        screenButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                viewScreenActionPerformed(evt);
-            }
-        });
-        toolBar.add(screenButton);
-
-        charactersButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/game.png"))); // NOI18N
-        charactersButton.setToolTipText("View as character set");
-        charactersButton.setFocusable(false);
-        charactersButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        charactersButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        charactersButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                viewCharactersActionPerformed(evt);
-            }
-        });
-        toolBar.add(charactersButton);
-
-        inspectButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/View.png"))); // NOI18N
-        inspectButton.setToolTipText("Inspect File Contents");
+        inspectButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/book_open.png"))); // NOI18N
+        inspectButton.setToolTipText("View File Contents");
         inspectButton.setFocusable(false);
         inspectButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         inspectButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -308,6 +289,30 @@ public class JatmUI extends javax.swing.JFrame {
             }
         });
         toolBar.add(mapButton);
+
+        screenButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/Display.png"))); // NOI18N
+        screenButton.setToolTipText("View File as Screen Data");
+        screenButton.setFocusable(false);
+        screenButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        screenButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        screenButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                viewScreenActionPerformed(evt);
+            }
+        });
+        toolBar.add(screenButton);
+
+        charactersButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/game.png"))); // NOI18N
+        charactersButton.setToolTipText("View file as Character Set");
+        charactersButton.setFocusable(false);
+        charactersButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        charactersButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        charactersButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                viewCharactersActionPerformed(evt);
+            }
+        });
+        toolBar.add(charactersButton);
 
         statusBarLeftText.setText("Jupiter Ace Tape Manager");
 
@@ -376,7 +381,7 @@ public class JatmUI extends javax.swing.JFrame {
         newList.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/page_white.png"))); // NOI18N
         newList.setMnemonic('C');
         newList.setText("Clear List");
-        newList.setToolTipText("Discard all loaded files");
+        newList.setToolTipText("Discard All Loaded Files");
         newList.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 clearListActionPerformed(evt);
@@ -388,7 +393,7 @@ public class JatmUI extends javax.swing.JFrame {
         openFile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/folder.png"))); // NOI18N
         openFile.setMnemonic('L');
         openFile.setText("Load..");
-        openFile.setToolTipText("Load file(s)");
+        openFile.setToolTipText("Load File(s)");
         openFile.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 loadFileActionPerformed(evt);
@@ -400,7 +405,7 @@ public class JatmUI extends javax.swing.JFrame {
         saveFile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/disk.png"))); // NOI18N
         saveFile.setMnemonic('S');
         saveFile.setText("Save..");
-        saveFile.setToolTipText("Save selected files");
+        saveFile.setToolTipText("Save Selected Files");
         saveFile.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 saveFileActionPerformed(evt);
@@ -413,7 +418,7 @@ public class JatmUI extends javax.swing.JFrame {
         exit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/Turn_off.png"))); // NOI18N
         exit.setMnemonic('x');
         exit.setText("Exit");
-        exit.setToolTipText("Close program and discard files");
+        exit.setToolTipText("Close JAtm and Discard Loaded Files");
         exit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 exitActionPerformed(evt);
@@ -441,26 +446,14 @@ public class JatmUI extends javax.swing.JFrame {
         editAttributes.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F2, java.awt.event.InputEvent.ALT_MASK));
         editAttributes.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/page_white_edit.png"))); // NOI18N
         editAttributes.setMnemonic('H');
-        editAttributes.setText("Header..");
-        editAttributes.setToolTipText("Edit file header");
+        editAttributes.setText("Attributes..");
+        editAttributes.setToolTipText("Edit file sttributes");
         editAttributes.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 editHeaderActionPerformed(evt);
             }
         });
         Edit.add(editAttributes);
-
-        fixCrc.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F, java.awt.event.InputEvent.CTRL_MASK));
-        fixCrc.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/wand.png"))); // NOI18N
-        fixCrc.setMnemonic('C');
-        fixCrc.setText("Fix CRC");
-        fixCrc.setToolTipText("Fix selected files checksum");
-        fixCrc.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                fixCrcActionPerformed(evt);
-            }
-        });
-        Edit.add(fixCrc);
         Edit.add(jSeparator7);
 
         selectAllMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_A, java.awt.event.InputEvent.CTRL_MASK));
@@ -495,11 +488,11 @@ public class JatmUI extends javax.swing.JFrame {
         Edit.add(invertSelectionMenuItem);
         Edit.add(jSeparator1);
 
-        moveTop.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_PAGE_UP, java.awt.event.InputEvent.ALT_MASK));
+        moveTop.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_HOME, java.awt.event.InputEvent.ALT_MASK));
         moveTop.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/Top.png"))); // NOI18N
         moveTop.setMnemonic('T');
         moveTop.setText("Move to Top");
-        moveTop.setToolTipText("Move selection to list top");
+        moveTop.setToolTipText("Move selection to top");
         moveTop.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 moveTopActionPerformed(evt);
@@ -511,7 +504,7 @@ public class JatmUI extends javax.swing.JFrame {
         moveUp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/Up.png"))); // NOI18N
         moveUp.setMnemonic('U');
         moveUp.setText("Move Up");
-        moveUp.setToolTipText("Move selection one position up in list");
+        moveUp.setToolTipText("Move selection up one position");
         moveUp.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 moveUpActionPerformed(evt);
@@ -523,7 +516,7 @@ public class JatmUI extends javax.swing.JFrame {
         moveDown.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/Down.png"))); // NOI18N
         moveDown.setMnemonic('D');
         moveDown.setText("Move Down");
-        moveDown.setToolTipText("Move selection one position down in list");
+        moveDown.setToolTipText("Move selection down one position");
         moveDown.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 moveDownActionPerformed(evt);
@@ -531,11 +524,11 @@ public class JatmUI extends javax.swing.JFrame {
         });
         Edit.add(moveDown);
 
-        moveBottom.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_PAGE_DOWN, java.awt.event.InputEvent.ALT_MASK));
+        moveBottom.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_END, java.awt.event.InputEvent.ALT_MASK));
         moveBottom.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/Bottom.png"))); // NOI18N
         moveBottom.setMnemonic('B');
         moveBottom.setText("Move to Bottom");
-        moveBottom.setToolTipText("Move selection to list bottom");
+        moveBottom.setToolTipText("Move selection to bottom");
         moveBottom.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 moveBottomActionPerformed(evt);
@@ -543,6 +536,17 @@ public class JatmUI extends javax.swing.JFrame {
         });
         Edit.add(moveBottom);
         Edit.add(jSeparator8);
+
+        duplicate.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, java.awt.event.InputEvent.CTRL_MASK));
+        duplicate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/application_double.png"))); // NOI18N
+        duplicate.setText("Duplicate");
+        duplicate.setToolTipText("Create a copy");
+        duplicate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                duplicateActionPerformed(evt);
+            }
+        });
+        Edit.add(duplicate);
 
         removeItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_DELETE, 0));
         removeItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/cross.png"))); // NOI18N
@@ -562,11 +566,34 @@ public class JatmUI extends javax.swing.JFrame {
         View.setText("View");
         View.setToolTipText("");
 
+        viewInspect.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_I, java.awt.event.InputEvent.ALT_MASK));
+        viewInspect.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/book_open.png"))); // NOI18N
+        viewInspect.setMnemonic('I');
+        viewInspect.setText("Contents..");
+        viewInspect.setToolTipText("View File Contents");
+        viewInspect.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                viewInspectActionPerformed(evt);
+            }
+        });
+        View.add(viewInspect);
+
+        viewMap.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_M, java.awt.event.InputEvent.ALT_MASK));
+        viewMap.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/script.png"))); // NOI18N
+        viewMap.setText("Memory Map..");
+        viewMap.setToolTipText("View Memory Map");
+        viewMap.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                viewMapActionPerformed(evt);
+            }
+        });
+        View.add(viewMap);
+
         viewScreen.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.ALT_MASK));
         viewScreen.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/Display.png"))); // NOI18N
         viewScreen.setMnemonic('S');
         viewScreen.setText("Screen..");
-        viewScreen.setToolTipText("View File as Screen");
+        viewScreen.setToolTipText("View File as Screen Data");
         viewScreen.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 viewScreenActionPerformed(evt);
@@ -586,43 +613,15 @@ public class JatmUI extends javax.swing.JFrame {
         });
         View.add(viewCharacters);
 
-        viewInspect.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_I, java.awt.event.InputEvent.ALT_MASK));
-        viewInspect.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/View.png"))); // NOI18N
-        viewInspect.setMnemonic('I');
-        viewInspect.setText("Inspect Content..");
-        viewInspect.setToolTipText("View file Contents");
-        viewInspect.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                viewInspectActionPerformed(evt);
-            }
-        });
-        View.add(viewInspect);
-
-        viewMap.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_M, java.awt.event.InputEvent.ALT_MASK));
-        viewMap.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/script.png"))); // NOI18N
-        viewMap.setText("Memory Map..");
-        viewMap.setToolTipText("View Memory Map");
-        viewMap.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                viewMapActionPerformed(evt);
-            }
-        });
-        View.add(viewMap);
-
         jMenuBar1.add(View);
 
         Setup.setMnemonic('S');
         Setup.setText("Setup");
 
-        wavSaveSetup.setText("WAV Save..");
-        wavSaveSetup.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                wavSaveSetupActionPerformed(evt);
-            }
-        });
-        Setup.add(wavSaveSetup);
-
+        wavLoadSetup.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.ALT_MASK | java.awt.event.InputEvent.CTRL_MASK));
+        wavLoadSetup.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/jatm_cassette_load.png"))); // NOI18N
         wavLoadSetup.setText("WAV Load..");
+        wavLoadSetup.setToolTipText("Set WAV Load Parameters");
         wavLoadSetup.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 wavLoadSetupActionPerformed(evt);
@@ -630,12 +629,46 @@ public class JatmUI extends javax.swing.JFrame {
         });
         Setup.add(wavLoadSetup);
 
+        wavSaveSetup.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.ALT_MASK | java.awt.event.InputEvent.CTRL_MASK));
+        wavSaveSetup.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/jatm_cassette.png"))); // NOI18N
+        wavSaveSetup.setText("WAV Save..");
+        wavSaveSetup.setToolTipText("Set WAV Save Parameters");
+        wavSaveSetup.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                wavSaveSetupActionPerformed(evt);
+            }
+        });
+        Setup.add(wavSaveSetup);
+
         jMenuBar1.add(Setup);
+
+        toolsMenu.setText("Tools");
+
+        compare.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_EQUALS, java.awt.event.InputEvent.CTRL_MASK));
+        compare.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/View.png"))); // NOI18N
+        compare.setText("Compare..");
+        compare.setToolTipText("Compare Selected Files");
+        toolsMenu.add(compare);
+
+        fixCrc.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F, java.awt.event.InputEvent.CTRL_MASK));
+        fixCrc.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/wand.png"))); // NOI18N
+        fixCrc.setMnemonic('C');
+        fixCrc.setText("Fix CRC");
+        fixCrc.setToolTipText("Fix checksum");
+        fixCrc.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                fixCrcActionPerformed(evt);
+            }
+        });
+        toolsMenu.add(fixCrc);
+
+        jMenuBar1.add(toolsMenu);
 
         Help.setMnemonic('H');
         Help.setText("Help");
 
         JARsite.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F1, java.awt.event.InputEvent.SHIFT_MASK));
+        JARsite.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/world_link.png"))); // NOI18N
         JARsite.setText("Jupiter Ace Resource Archive");
         JARsite.setToolTipText("www.jupiter-ace.co.uk");
         JARsite.addActionListener(new java.awt.event.ActionListener() {
@@ -645,6 +678,7 @@ public class JatmUI extends javax.swing.JFrame {
         });
         Help.add(JARsite);
 
+        JAtmSourceCode.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/world_link.png"))); // NOI18N
         JAtmSourceCode.setText("JAtm source code");
         JAtmSourceCode.setToolTipText("JAtm source code at GitHub repository");
         JAtmSourceCode.addActionListener(new java.awt.event.ActionListener() {
@@ -659,7 +693,7 @@ public class JatmUI extends javax.swing.JFrame {
         about.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/information.png"))); // NOI18N
         about.setMnemonic('A');
         about.setText("About JAtm..");
-        about.setToolTipText("");
+        about.setToolTipText("About this program");
         about.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 aboutActionPerformed(evt);
@@ -752,27 +786,28 @@ public class JatmUI extends javax.swing.JFrame {
     private void aboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aboutActionPerformed
         ImageIcon icon = new ImageIcon("src/images/jatm.png");
         JOptionPane.showMessageDialog(this,
-                "JAtm - The Jupiter Ace tape manager version " + version
-                +"\nhttp://www.jupiter-ace.co.uk \n\n"
-                +"Copyright \u00a9 2015  Ricardo Fernandes Lopes.\n\n"
-                
-    +"This program is free software: you can redistribute it and/or modify\n"
-    +"it under the terms of the GNU General Public License as published by\n"
-    +"the Free Software Foundation, either version 3 of the License, or\n"
-    +"(at your option) any later version.\n\n"
+            "<html><b>JAtm: The Jupiter Ace tape manager</b>"
+            +" - version " + version
+            +"<br>www.jupiter-ace.co.uk</a>"
+            +"<p><hr>Copyright \u00a9 2015-2016  Ricardo Fernandes Lopes</p>"
+              
+    +"<p><br>This program is free software: you can redistribute it and/or modify"
+    +"<br>it under the terms of the GNU General Public License as published by"
+    +"<br>the Free Software Foundation, either version 3 of the License, or"
+    +"<br>(at your option) any later version.</p>"
 
-    +"This program is distributed in the hope that it will be useful,\n"
-    +"but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
-    +"MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
-    +"GNU General Public License for more details.\n\n"
+    +"<p><br>This program is distributed in the hope that it will be useful,"
+    +"<br>but WITHOUT ANY WARRANTY; without even the implied warranty of"
+    +"<br>MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+    +"<br>See the GNU General Public License for more details.</p>"
 
-    +"You should have received a copy of the GNU General Public License\n"
-    +"along with this program.  If not, see <http://www.gnu.org/licenses/>.\n\n"              
+    +"<p><br>You should have received a copy of the <b>GNU General Public License</b>"
+    +"<br>along with this program.  If not, see http://www.gnu.org/licenses/</p>"              
                 
-                +"JAtm includes or uses:\n"
-                +"- Silk Icon Set http://www.famfamfam.com/lab/icon/\n\n",
-                "About JAtm",
-                JOptionPane.INFORMATION_MESSAGE, icon);       
+            +"<p><br>JAtm includes or uses:"
+            +"<ul> <li>Silk Icon Set http://www.famfamfam.com/lab/icon/</li></ul></p></html>",
+            "About JAtm",
+            JOptionPane.INFORMATION_MESSAGE, icon);       
     }//GEN-LAST:event_aboutActionPerformed
 
     private void editNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editNameActionPerformed
@@ -780,7 +815,7 @@ public class JatmUI extends javax.swing.JFrame {
         if(row >= 0) { // at least one selection
             JaTape tape = jaTapeList.get( row );
             String result = JOptionPane.showInputDialog(this,
-                    "Rename " + tape.getFilename() + " to:",
+                    "Rename [ " + tape.getFilename() + " ] to:",
                     tape.getFilename());
             if(result != null) {
                 tape.setFilename(result);
@@ -836,8 +871,8 @@ public class JatmUI extends javax.swing.JFrame {
     private void editHeaderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editHeaderActionPerformed
         int row = tapeListTable.getSelectedRow();
         if(row >= 0) { // At least one selection
-            EditHeaderDialog dialog;
-            dialog = new EditHeaderDialog(this,true,jaTapeList.get(row));
+            EditFileAttributesDialog dialog;
+            dialog = new EditFileAttributesDialog(this,true,jaTapeList.get(row));
             dialog.setVisible(true);
             tapeListTable.updateUI();
         } else { // Abort if no selection
@@ -1112,8 +1147,8 @@ public class JatmUI extends javax.swing.JFrame {
     private void viewInspectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewInspectActionPerformed
         int[] selection = tapeListTable.getSelectedRows();    // Get User Selection
         if(selection.length > 0) {
-            ViewInspectDialog dialog;
-            dialog = new ViewInspectDialog(this, true, jaTapeList.get( selection[0] ));
+            ViewFileContentsDialog dialog;
+            dialog = new ViewFileContentsDialog(this, true, jaTapeList.get( selection[0] ));
             dialog.setVisible(true);
         } else { // Abort if no selection
             msgNoSelectionError();
@@ -1129,7 +1164,7 @@ public class JatmUI extends javax.swing.JFrame {
     }//GEN-LAST:event_JARsiteActionPerformed
 
     private void wavLoadSetupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_wavLoadSetupActionPerformed
-        JDialog dialog = new LoadWavParamsDialog(this,true);
+        JDialog dialog = new WavLoadParamsDialog(this,true);
         dialog.setVisible(true);
     }//GEN-LAST:event_wavLoadSetupActionPerformed
 
@@ -1142,9 +1177,26 @@ public class JatmUI extends javax.swing.JFrame {
     }//GEN-LAST:event_JAtmSourceCodeActionPerformed
 
     private void wavSaveSetupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_wavSaveSetupActionPerformed
-        SaveWavParamsDialog dialog = new SaveWavParamsDialog(this,true);
+        WavSaveParamsDialog dialog = new WavSaveParamsDialog(this,true);
         dialog.setVisible(true);
     }//GEN-LAST:event_wavSaveSetupActionPerformed
+
+    private void duplicateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_duplicateActionPerformed
+        int[] selection = tapeListTable.getSelectedRows();    // Get User Selection
+        if(selection.length > 0) {
+            JaTape tape;
+            for (int row = 0; row < selection.length; row++) {
+                
+                tape = new JaTape(jaTapeList.get( selection[row] )); // create a copy
+                jaTapeList.add(tape); // append to list end
+            }
+            tapeListTable.clearSelection();
+            tapeListTableModel.fireTableDataChanged(); // refresh table draw
+            setStatusBarLeft(jaTapeList.size()); // Update Status Bar                      
+        } else { // Abort if no selection
+            msgNoSelectionError();
+        }
+    }//GEN-LAST:event_duplicateActionPerformed
 
     /**
      * @param args the command line arguments
@@ -1169,6 +1221,8 @@ public class JatmUI extends javax.swing.JFrame {
     private javax.swing.JMenu View;
     private javax.swing.JMenuItem about;
     private javax.swing.JButton charactersButton;
+    private javax.swing.JMenuItem compare;
+    private javax.swing.JMenuItem duplicate;
     private javax.swing.JMenuItem editAttributes;
     private javax.swing.JMenuItem editName;
     private javax.swing.JMenuItem exit;
@@ -1207,6 +1261,7 @@ public class JatmUI extends javax.swing.JFrame {
     private javax.swing.JLabel statusBarRightText;
     private javax.swing.JTable tapeListTable;
     private javax.swing.JToolBar toolBar;
+    private javax.swing.JMenu toolsMenu;
     private javax.swing.JMenuItem viewCharacters;
     private javax.swing.JMenuItem viewInspect;
     private javax.swing.JMenuItem viewMap;

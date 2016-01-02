@@ -21,14 +21,14 @@ package JatmUI;
 
 import Jatm.JatmWaveSave;
 
-public class SaveWavParamsDialog extends javax.swing.JDialog {
+public class WavSaveParamsDialog extends javax.swing.JDialog {
 
     /**
      * Creates new form SaveWavParamsDialog
      * @param parent
      * @param modal
      */
-    public SaveWavParamsDialog(java.awt.Frame parent, boolean modal) {
+    public WavSaveParamsDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
         initValues();
@@ -87,7 +87,7 @@ public class SaveWavParamsDialog extends javax.swing.JDialog {
         bitsComboBox = new javax.swing.JComboBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Save Wav File");
+        setTitle("Wav Save Parameters");
         setLocationByPlatform(true);
 
         volumePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Volume"));

@@ -51,11 +51,10 @@ public class ViewCharacterSetDialog extends javax.swing.JDialog {
     public ViewCharacterSetDialog(java.awt.Frame parent, boolean modal,
             byte[] data, int start, CharacterSet userCS, String filename) {
         super(parent, modal);
-        
-        this.setTitle("Characters [" + filename + "]");
-
         initComponents();
         
+        this.setTitle("Characters [ " + filename + " ]");
+
         charPanel.setSize(PANEL_SIZE, PANEL_SIZE);
         offset = start; // first character index
         nChars = data.length >> 3; // number of characters in data

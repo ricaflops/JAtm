@@ -26,12 +26,12 @@ import javax.swing.ImageIcon;
  *
  * @author Ricardo
  */
-public class EditHeaderDialog extends javax.swing.JDialog {
+public class EditFileAttributesDialog extends javax.swing.JDialog {
     // ------------------ STATIC --------------------
     private static final ImageIcon dictIcon, bytIcon;
     static{
-        dictIcon = new ImageIcon(EditHeaderDialog.class.getResource("resources/book.png"));
-        bytIcon  = new ImageIcon(EditHeaderDialog.class.getResource("resources/cog.png"));
+        dictIcon = new ImageIcon(EditFileAttributesDialog.class.getResource("resources/book.png"));
+        bytIcon  = new ImageIcon(EditFileAttributesDialog.class.getResource("resources/cog.png"));
     }    
     // ----------------------------------------------
     
@@ -45,13 +45,13 @@ public class EditHeaderDialog extends javax.swing.JDialog {
      * @param modal
      * @param t
      */
-    public EditHeaderDialog(java.awt.Frame parent, boolean modal, JaTape t) {
+    public EditFileAttributesDialog(java.awt.Frame parent, boolean modal, JaTape t) {
         super(parent, modal);
               
         initComponents();
 
         tape = t;
-        this.setTitle("File Header [" + tape.getFilename() + "]");   
+        this.setTitle("File Attributes [ " + tape.getFilename() + " ]");   
 
         filenameField.setText(tape.getFilename());
         lengthField.setText(String.valueOf(tape.getParameter(JaTape.LENGTH)));
@@ -137,7 +137,7 @@ public class EditHeaderDialog extends javax.swing.JDialog {
         makeDictButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Edit Attributes");
+        setTitle("Edit Parameters");
         setLocationByPlatform(true);
         setMinimumSize(new java.awt.Dimension(252, 246));
         setModal(true);

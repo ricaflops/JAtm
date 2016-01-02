@@ -38,7 +38,7 @@ public class ViewMapDialog extends javax.swing.JDialog {
         
         initComponents();
         
-        this.setTitle("Memory Map of " + tape.getFilename());
+        this.setTitle("Memory Map [ " + tape.getFilename()+" ]");
     }
     
     /**

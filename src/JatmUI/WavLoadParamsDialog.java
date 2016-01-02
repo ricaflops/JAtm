@@ -25,12 +25,12 @@ import Jatm.JatmWaveLoad;
  *
  * @author Ricardo
  */
-public class LoadWavParamsDialog extends javax.swing.JDialog {
+public class WavLoadParamsDialog extends javax.swing.JDialog {
 
     /**
      * Creates new form LoadWavParametersDialog
      */
-    public LoadWavParamsDialog(java.awt.Frame parent, boolean modal) {
+    public WavLoadParamsDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
         initValues();
@@ -79,7 +79,7 @@ public class LoadWavParamsDialog extends javax.swing.JDialog {
         chRightRadioButton = new javax.swing.JRadioButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Load WAV File");
+        setTitle("WAV Load Parameters");
         setLocationByPlatform(true);
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Level %"));

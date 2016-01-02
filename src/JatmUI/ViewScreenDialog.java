@@ -47,8 +47,8 @@ public class ViewScreenDialog extends javax.swing.JDialog {
      */
     public ViewScreenDialog(java.awt.Frame parent, boolean modal, byte[] data, CharacterSet charSet, String filename) {
         super(parent, modal);
-        
-        this.setTitle("Screen [" + filename + "]");
+        initComponents();        
+        this.setTitle("Screen Data [ " + filename + " ]");
         
         // fill screen with file data
         screen = new byte[1024];
@@ -60,8 +60,6 @@ public class ViewScreenDialog extends javax.swing.JDialog {
             }
         }        
         userCharSet = charSet;
-        
-        initComponents();
         screenPanel.setSize(PANEL_WIDTH, PANEL_HEIGTH);
     }
     

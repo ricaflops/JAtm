@@ -21,9 +21,27 @@ package JatmUI;
 
 import Jatm.JaVocabulary;
 import Jatm.JaTape;
+import java.awt.Font;
+import java.awt.FontFormatException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-public class ViewInspectDialog extends javax.swing.JDialog {
+public class ViewFileContentsDialog extends javax.swing.JDialog {
 
+    private static Font baseFont, aceFont;
+    static {
+        InputStream fontStream = ViewFileContentsDialog.class.getResourceAsStream("resources/JupiterAce2.ttf");
+        try {
+            baseFont = Font.createFont(Font.TRUETYPE_FONT, fontStream);
+        } catch (FontFormatException | IOException ex) {
+            Logger.getLogger(ViewFileContentsDialog.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        aceFont = baseFont.deriveFont(Font.PLAIN,8);
+    }
+    
     private final JaTape tape;
     private final byte[] data;
     private final JaVocabulary forthVocabulary;
@@ -34,7 +52,7 @@ public class ViewInspectDialog extends javax.swing.JDialog {
      * @param modal
      * @param t
      */
-    public ViewInspectDialog(java.awt.Frame parent, boolean modal, JaTape t) {
+    public ViewFileContentsDialog(java.awt.Frame parent, boolean modal, JaTape t) {
         super(parent, modal);
 
         tape = t;
@@ -42,8 +60,10 @@ public class ViewInspectDialog extends javax.swing.JDialog {
         forthVocabulary = new JaVocabulary(t);
 
         initComponents();
-
-        this.setTitle("Inspecting file " + t.getFilename());
+        hexDumpTextArea.setFont(aceFont);
+        codeTextArea.setFont(aceFont);
+        vocTextArea.setFont(aceFont);
+        this.setTitle("File Contents [ " + t.getFilename()+" ]");
 
         showVocabulary();
         showCode();
@@ -128,17 +148,17 @@ public class ViewInspectDialog extends javax.swing.JDialog {
             sbAsc.setLength(0); // Clear Ascii chars string buffer
             sbHex.append(String.format("%04X:", adr)); // Address
             sbAsc.append("   "); // Ascii separation
-            //HexTextArea.append(String.format("%04X: ", adr));
             for(int n = i; n < i+16; n++) {
                 if( n < data.length) {
-                    byte c = data[n];
-                    sbHex.append(String.format(" %02X", c));
-                    c &= 0x7F;  // convert inverse chars to ascii
-                    if(data[n]>=32 && c <= 127) { // avoid control & graphic chars
-                        sbAsc.append((char)c);
-                    } else {
-                        sbAsc.append(".");
+                    int c = data[n] & 0xFF; // get unbsigned char value
+                    sbHex.append(String.format(" %02X", data[n]));
+                    if(data[n] == 10) { // replace CR by an equivalent glyph
+                        c = 26; 
                     }
+                    if(data[n] == 9) { // replace TAB by an equivalent glyph
+                        c = 25;
+                    }
+                    sbAsc.append((char)c);
                 } else {
                     sbHex.append("   "); // Fill last line gap
                 }

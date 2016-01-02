@@ -67,6 +67,14 @@ public class JaTape {
     }
     
     /**
+     * Copy Constructor
+     * @param tape 
+     */
+     public JaTape(JaTape tape) {
+        this(tape.getHeaderBlock(), tape.getDataBlock());
+    }
+    
+    /**
      * Constructor: Tape File from header and data blocks
      * @param hdr header block byte array
      * @param dat data block byte array

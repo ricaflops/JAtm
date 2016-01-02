@@ -23,11 +23,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import static java.lang.Integer.parseInt;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /*
  RAM Vocabulary Header Fields:
@@ -370,12 +373,12 @@ public class JaVocabulary {
     private int appendString(StringBuilder strBuf, int address) {
         int strlen = tapeFile.getMemWord(address);  // String Length
         address = address + 2;
-        byte[] str = new byte[strlen];  // String Characters
+        int c;
         for (int i = 0; i < strlen; i++) {
-            str[i] = tapeFile.getMemByte(address);
+            c = tapeFile.getMemByte(address) & 0xFF;
+            strBuf.append((char)c);
             address++;
         }
-        strBuf.append(" ").append(new String(str)); // print string with leading space
         return strlen + 2;                        // return number of bytes
     }
 
