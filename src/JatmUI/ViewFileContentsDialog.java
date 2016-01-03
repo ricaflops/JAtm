@@ -25,21 +25,21 @@ import java.awt.Font;
 import java.awt.FontFormatException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ViewFileContentsDialog extends javax.swing.JDialog {
 
-    private static Font baseFont, aceFont;
+    private static Font baseAceFont;
+    private static final Font aceFont;
     static {
         InputStream fontStream = ViewFileContentsDialog.class.getResourceAsStream("resources/JupiterAce2.ttf");
         try {
-            baseFont = Font.createFont(Font.TRUETYPE_FONT, fontStream);
+            baseAceFont = Font.createFont(Font.TRUETYPE_FONT, fontStream);
         } catch (FontFormatException | IOException ex) {
             Logger.getLogger(ViewFileContentsDialog.class.getName()).log(Level.SEVERE, null, ex);
         }
-        aceFont = baseFont.deriveFont(Font.PLAIN,8);
+        aceFont = baseAceFont.deriveFont(Font.PLAIN,8);
     }
     
     private final JaTape tape;
