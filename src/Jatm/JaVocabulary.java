@@ -23,31 +23,19 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import static java.lang.Integer.parseInt;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Stack;
 
 /*
- RAM Vocabulary Header Fields:
+ RAM Vocabulary Word Structure:
  0 to 63 bytes   Name    Word name   last char with bit-7 set
- 2 bytes         Length  Lebgth of Parameter Field + 7
+ 2 bytes         Length  Length of Parameter Field + 7
  2 bytes         Link    Points to previous word Name Length Field
  1 byte          Name Length (bits 0-5): Name Length   bit 6: IMMEDIATE word flag
  2 bytes         Code        strBuf address to execute this word
  n bytes         Parameter   (n = Length Field - 7)
-
- Offset from CFA:
- -n-5: Name (0-63 characters)
- -5: Length (x)
- -3: Link (point to previous word Name Length)
- -1: Name Length (n) (bit-6 = IMMEDIATE flag)
- 0: Code
- +2: Parameter (x-7 bytes)
  */
 
 /**
@@ -55,13 +43,22 @@ import java.util.logging.Logger;
  * @author Ricardo F. Lopes
  */
 public class JaVocabulary {
+    private final JaTape tape;                            // The tape file
+    private final Stack<Integer> vocStack;                // VOCABULARY words
+    private static final HashMap<Integer, String> ROM_CFA_LIST;  // ROM CFA list
+    private final HashMap<Integer, String> fileCfaList; // File CFA list
+    private String vlist; // VLIST text
 
-    private final HashMap<Integer, String> vocabularyMap; // Tape file vocabulary
-    List<Integer> cfaList;
-    private final JaTape tapeFile;
+    private static final int MAX_WORDS_PER_LINE = 5; // Max Number of Words per line in code listing
 
-    // Max Number of Words per line in code listing
-    private static final int MAX_WORDS_PER_LINE = 5;
+    // Address offsets from a word name length position
+    private static final int LENGTH_OFFSET = -4; // Word Length
+    private static final int LINK_OFFSET   = -2; // Next Link offset from link address
+    private static final int CFA_OFFSET    =  1; // CFA offset from link address
+    private static final int PFA_OFFSET    =  3; // CFA offset from link address
+    // Address ofsets for a VOCABULARY word
+    private static final int TOPWRD_OFFSET =  3; // Top Word Link offset from link address
+    private static final int VOCLNK_OFFSET =  6; // VOCLNK offset from link address
 
     // Word Types based on CFA (Code Field Address)
     private static final int DOCOLON  = 0x0EC3;
@@ -69,6 +66,7 @@ public class JaVocabulary {
     private static final int VARIABLE = 0x0FF0;
     private static final int CONSTANT = 0x0FF5;
     private static final int DEFINER  = 0x1085;
+    private static final int VOCAB    = 0x11B5;
     // private static final int COMPILER = 0x10F5;
     private static final int COMPILER  = 0x1108;
 
@@ -93,293 +91,372 @@ public class JaVocabulary {
     private static final int ROM_REPEAT       = 0x1276; // REPEAT
     private static final int ROM_SEMICOLON    = 0x04B6; // ;
 
-    //------------------ Static ROM Vocabulary read from a txt file ----------------
-    private static final HashMap<Integer, String> ROM_VOC;
+    // ROM Vocabulary. Read from a txt file
+
     static {
-        ROM_VOC = new HashMap<>();
+        ROM_CFA_LIST = new HashMap<>();
         try (InputStream in = JaVocabulary.class.getResourceAsStream("resources/ROM_words.txt")) {
             BufferedReader buf = new BufferedReader(new InputStreamReader(in));
             String line;
             while ((line = buf.readLine()) != null) {
-                String parts[] = line.split(" "); // Space delimited values
-                ROM_VOC.put(parseInt(parts[0], 16), parts[1]); // Build Hash Map
+                String parts[] = line.split(" ");              // Space delimited values
+                ROM_CFA_LIST.put(parseInt(parts[0], 16), parts[1]); // Build Hash Map
             }
             in.close();
         } catch (IOException e) {
             System.out.println("IOException");
         }
     }
-    // -----------------------------------------------------------------------------
 
     /**
      * Constructor
-     * @param tape Jupiter Ace tape object
+     * @param tapeFile Jupiter Ace tape file
      */
-    public JaVocabulary(JaTape tape) {
-        vocabularyMap = new HashMap<>(); // Tape File vocabulary
-        cfaList = new ArrayList<>();   // CFA list
-        tapeFile = tape;
-        buildVocabularyList();
+    public JaVocabulary(JaTape tapeFile) {
+        tape = tapeFile;
+
+        fileCfaList = new HashMap<>(); // Tape File words
+        vocStack = new Stack<>();          // File Vocabularies
+
+        if (tape.isDict()) {
+            vocabularyScan();      // scan Vocabularies only if Dictionary file
+            buildVlist();          // Build vlist string and CFA list
+        }
+    }
+
+    public String getVlist() {
+        return vlist;
     }
 
     /**
-     * Scan file and build a vocabulary list populating <code>cfaList</code>
+     * Build vocabulary list
      */
-    private void buildVocabularyList() {
-        if (tapeFile.isDict()) { // scan Words only if it is a Dictionary file
-            int link = tapeFile.getParameter(JaTape.CURR_WRD); // get first word link
-            // scan until link to outside file boudaries
-            while (tapeFile.validAddress(link)) {
-                // Get Word Name Length
-                byte nameLength = (byte) (tapeFile.getMemByte(link) & 0x3F); // clear bits 6,7
-                // Get Word Name Characters
-                byte[] nameChars = new byte[nameLength];
-                for (int i = 0; i < nameLength; i++) { // clear bit-7 of all chars
-                    nameChars[i] = (byte) (tapeFile.getMemByte(link - 4 - nameLength + i) & 0x7F);
-                }
-                // Create Word Name String
-                String wordName = new String(nameChars, StandardCharsets.UTF_8);
-                // Build CFA to Word name map
-                vocabularyMap.put(link + 1, wordName); // CFA = link+1
-                cfaList.add(link + 1);                 // Build CFA List
-
-                link = tapeFile.getMemWord(link - 2);  // get next word link
+    private void vocabularyScan() {
+        int link = tape.getParameter(JaTape.CURR_WRD); // newest word link in dictionary
+        while(link > 0x2000) {                         // limit scan to RAM words only
+            if( isVocabulary(link) ) {
+                vocStack.push(link);                   // collect VOCABULARY words
             }
+            link = getNextWord(link);                  // get next word link
         }
+    }
+
+    /**
+     * Get Word Name
+     * @param link
+     * @return word name string
+     */
+    private String getWordName(int link) {
+        byte nameLength = (byte) (tape.getMemByte(link) & 0x3F); // clear bits 6,7
+        // Get Word Name Characters
+        byte[] nameChars = new byte[nameLength];
+        for (int i = 0; i < nameLength; i++) { // clear bit-7 of all chars
+            nameChars[i] = (byte) (tape.getMemByte(link - 4 - nameLength + i) & 0x7F);
+        }
+        // Create Word Name String
+        String name = new String(nameChars, StandardCharsets.UTF_8);
+        return name ;
+    }
+
+    /**
+     * Get next linked word link
+     * @param link  name length field address of a vocabulary word
+     * @return link to previous word in linking chain
+     */
+    private int getNextWord(int link) {
+        return tape.getMemWord(link + LINK_OFFSET);
+    }
+
+    /**
+     * get Code Field Value
+     * @param link name length field address of a vocabulary word
+     * @return contents of the Code Field
+     */
+    private int getCodeField(int link) {
+        return tape.getMemWord(link + CFA_OFFSET);
+    }
+
+    /**
+     * get Top Word link in a Vocabulary
+     * @param link name length field address of a vocabulary word
+     * @return link to newest word in Vocabulary
+     */
+    private int getVocabTopWordLink(int link) {
+        return tape.getMemWord(link + TOPWRD_OFFSET);
+    }
+
+    /**
+     * Check if a word is a VOCABULARY word
+     * @param link name length field address of a vocabulary word
+     * @return True if link points to a VOCABULARY word
+     */
+    private boolean isVocabulary(int link) {
+        return getCodeField(link) == VOCAB; // check code field address
     }
 
     /**
      * @return Number of words in vocabulary
      */
     public int vocabularySize() {
-        return vocabularyMap.size();
+        return fileCfaList.size();
     }
 
     /**
-     * Lists words in vocabulary (similar to VLIST). One word per line
+     * List linked words with it's CFA
+     * @param link words in the link chain
+     * @param out resulting String Buffer
+     * @return number of words listed
+     */
+    private int listWords(int link, StringBuilder out ) {
+        int count = 0;
+        while( tape.validAddress(link) ) {
+            fileCfaList.put(link + CFA_OFFSET, getWordName(link)); // build list of CFA in tape file
+            out.append(String.format("%04Xh: ", link+CFA_OFFSET)); // CFA
+            out.append(getWordName(link)).append("\n");            // Word name
+            link = getNextWord(link);                              // get next word link
+            count++;                                               // count words in dictionary
+        }
+        return count;
+    }
+
+    /**
+     * Lists words in vocabulary. One word per line, all vocabularies
      * @return vocabulary list as a String
      */
-    public String vlist() {
-        StringBuilder wordList = new StringBuilder();
-        cfaList.stream().forEach((cfa) -> {
-            wordList.append(vocabularyMap.get(cfa)).append(" ");
-        });
-        return wordList.toString();
+    private void buildVlist() {
+        StringBuilder out = new StringBuilder();
+        int link;
+        int wordCount = 0;
+         // List Vocabulary Words
+        for (Integer vocLink : vocStack) {
+            out.append(String.format("\n%s DEFINITIONS\n",getWordName(vocLink)));
+            link = getVocabTopWordLink(vocLink);
+            wordCount += listWords(link, out );
+        }
+
+        // List FORTH Vocabulary words
+        out.append("\nFORTH DEFINITIONS\n");
+        link = tape.getParameter(JaTape.CURR_WRD);     // newest word link in dictionary
+        wordCount += listWords(link, out);
+
+        out.append("\nTotal: ").append(wordCount).append(" words in dictionary.");
+        vlist = out.toString();
     }
 
     /**
-     * Lists words in vocabulary (similar to VLIST). One word per line
-     * @return vocabulary list as a String
+     * Decompile a single Forth Word
+     * @param link Link to the word to be decoded
+     * @param out StringBuilder were decoding text will be appended
      */
-    public String listCfa() {
-        StringBuilder wordList = new StringBuilder();
-        cfaList.stream().forEach((cfa) -> {
-            wordList.append(String.format("%04Xh: ", cfa));
-            wordList.append(vocabularyMap.get(cfa)).append("\n");
-        });
-        return wordList.toString();
-    }    
-    
-    /**
-     * Disassemble FORTH vocabulary
-     * @return Decoded vocabulary as a String
-     */
-    public String listAllWords() {
-        StringBuilder strBuf = new StringBuilder(); // resulting String buffer
-        // Reverse word list order to disassemble older words first
-        int[] reverseCfaList = new int[cfaList.size()];
-        for (int i = 0; i < cfaList.size(); i++) {
-            reverseCfaList[reverseCfaList.length - i - 1] = cfaList.get(i);
-        }
-        // Disassemble each Forth word in list
-        for (int cfa : reverseCfaList) {
-            listWord(strBuf, cfa);
-        }
-        return strBuf.toString();
-    }
+    private void decodeWord(int link, StringBuilder out) {
+        String wordName = getWordName(link); // get word Name
+        int cfa = getCodeField(link);        // get word Code Field content
+        int wordLength = tape.getMemWord(link + LENGTH_OFFSET) - 7;
 
-    /**
-     * List contents of a FORTH word
-     * @param strBuf listing
-     * @param cfa Word Code Field Address
-     */
-    private void listWord(StringBuilder strBuf, int cfa) {
-        String wordName = vocabularyMap.get(cfa); // get word Name
-        int codeField = tapeFile.getMemWord(cfa); // get word Code Field
-        // Append Word prefix according to code field
-        switch (codeField) {
+        switch (cfa) {  // Append Word prefix according to code field
             case CREATE:   // CREATE name (size)
-                strBuf.append("CREATE");
+                out.append(String.format("CREATE %s ( %d bytes )", wordName, wordLength));
                 break;
             case VARIABLE: // VARIABLE name
-                strBuf.append("VARIABLE");
+                out.append(String.format("VARIABLE %s", wordName));
                 break;
             case CONSTANT: // xx CONSTANT name
-                strBuf.append(getInt(cfa + 2));
-                strBuf.append(" CONSTANT");
+                out.append(String.format("%d CONSTANT %s",getInt(link + PFA_OFFSET), wordName));
                 break;
-            case DEFINER:  // DEFINER name
-                strBuf.append("DEFINER");
+             case VOCAB:    // VOCABULARY name
+                out.append(String.format("VOCABULARY %s", wordName));
                 break;
-            case COMPILER:  // COMPILER name
-                strBuf.append("COMPILER");
-                break;
-            default:       // : name
-                strBuf.append(":");
-                break;
-        }
-        
-        // Append Word Name
-        strBuf.append(" ").append(wordName).append(" ");
-
-        // Append Word Body according to code field
-        switch (codeField) {
-            case CREATE:   // CREATE name (size)
-                strBuf.append(" ( ").append(tapeFile.getMemWord(cfa - 5)).append(" bytes )");
-                break;
-            case VARIABLE: // VARIABLE name
-            case CONSTANT: // xx CONSTANT name
-                break;
-            case DOCOLON:  // : name <FORTHcode> ;
             case DEFINER:  // DEFINER name <FORTHcode> DOES> ;
-            case COMPILER: // COMPILER name <FORTHcode> RUNS> ;
-                listDoColonWord(strBuf, cfa);
+                out.append(String.format("DEFINER %s", wordName));
+                decodeDoColon(link, out);
                 break;
-            default:       // : name ( CFA=xxxx ) ... unlistable word
-                strBuf.append("( CFA=").append(String.format("%04Xh", cfa)).append(" )");
+            case COMPILER:  // COMPILER name <FORTHcode> RUNS> ;
+                out.append(String.format("COMPILER %s", wordName));
+                decodeDoColon(link, out);
                 break;
-        }    
-        strBuf.append("\n"); // Next line  
+            case DOCOLON:    // : name <FORTHcode> ;
+                out.append(String.format(": %s", wordName));
+                decodeDoColon(link, out);
+                break;
+            default:       // : name ( CFA:xxxx ) ... (Unlistable word)
+                out.append(String.format(": %s ( CFA:%04Xh )\n;", wordName, cfa) );
+                break;
+        }
+        out.append("\n");    // Next line
     }
-    
+
+    /**
+     * Decompile all words in a vocabulary
+     * @param link
+     * @param out
+     */
+    private void decodeVocab(int link, StringBuilder out) {
+        Stack<Integer> wordStack = new Stack<>(); // list of words in vocabulary
+        // build word list
+         while( tape.validAddress(link) ) {
+            wordStack.push(link);
+            link = getNextWord(link);                      // get next word link                                     // count words in dictionary
+        }
+        // decode each words in vocabulary in proper order
+        while( !wordStack.empty() ) {
+            link = wordStack.pop();
+            decodeWord(link, out);
+        }
+    }
+
+    /**
+     * Decompile all words in file
+     * @return String code text
+     */
+    public String dictCodeListing() {
+        StringBuilder codeListing = new StringBuilder(); // resulting String buffer
+
+        //Decode words in FORTH vocabulary
+        codeListing.append("FORTH DEFINITIONS\n");
+        int wordLink = tape.getParameter(JaTape.CURR_WRD); // start with newest word in dictionary
+        decodeVocab(wordLink, codeListing); // decode all linked words in vocabulary
+
+        // Decode words in other vocabularies
+        for (int i=vocStack.size()-1; i>=0; i--) { // Decode words in all vocabularies
+            int vocLink = vocStack.get(i);
+            codeListing.append(String.format("\n%s DEFINITIONS\n",getWordName(vocLink)));
+            wordLink = getVocabTopWordLink(vocLink); // start with newest word in this vocabulary
+            decodeVocab(wordLink, codeListing); // decode all linked words in vocabulary
+        }
+        return codeListing.toString();
+    }
+
     /**
      * List DOCOLON word contents
-     * @param strBuf  is the output StringBuilder buffer
+     * @param out  is the output StringBuilder buffer
      * @param cfa is te Code Field Address of the word to disassemble
      */
-    private void listDoColonWord(StringBuilder strBuf, int cfa) {
-        int parameterFieldSize = tapeFile.getMemWord(cfa - 5) - 7; // Parameter Field Length
-        int parameterFieldAddress = cfa + 2;            // Parameter Field Address
-        int address = parameterFieldAddress; // current address
-        int wordCount = MAX_WORDS_PER_LINE;  // Start with a new line now
-        int tab = 1; // start with one space tab
-        while (address < parameterFieldAddress + parameterFieldSize) {
-            wordCount++; // Count words printed in in this line
-            int parameter = tapeFile.getMemWord(address); // get parameter disassemble
-            // Check for words that decreases identation
-            if (    parameter == ROM_THEN   || parameter == ROM_WHILE     ||
-                    parameter == ROM_REPEAT || parameter == ROM_SEMICOLON ||
-                    parameter == ROM_LOOP   || parameter == ROM_PLOOP     ||
-                    parameter == ROM_ELSE   || parameter == ROM_UNTIL     ||
-                    parameter == ROM_DOES   || parameter == ROM_RUNS ) {
-                tab--; // decrease tab
+    private void decodeDoColon(int link, StringBuilder out) {
+        int parameterLength = tape.getMemWord(link + LENGTH_OFFSET) - 7; // Parameter Field Length
+        int parameterField = link + PFA_OFFSET;    // Parameter Field Address
+        int address = parameterField;              // current address
+        int wordCount = MAX_WORDS_PER_LINE;        // Start with a new line now
+        int tab = 1;                               // start with one space tab
+        while (address < parameterField + parameterLength) {
+            int cfa = tape.getMemWord(address); // get token to disassemble
+
+            wordCount++; // Count words printed in this line
+            // Check for ROM words that decreases identation
+            if (    cfa == ROM_THEN   || cfa == ROM_WHILE     ||
+                    cfa == ROM_REPEAT || cfa == ROM_SEMICOLON ||
+                    cfa == ROM_LOOP   || cfa == ROM_PLOOP     ||
+                    cfa == ROM_ELSE   || cfa == ROM_UNTIL     ||
+                    cfa == ROM_DOES   || cfa == ROM_RUNS ) {
+                tab--;                              // decrease tab
             }
-            // Check for words that starts a new line
-            if (    wordCount >= MAX_WORDS_PER_LINE || parameter == ROM_THEN   ||
-                    parameter == ROM_WHILE          || parameter == ROM_REPEAT ||
-                    parameter == ROM_SEMICOLON      || parameter == ROM_LOOP   ||
-                    parameter == ROM_PLOOP          || parameter == ROM_ELSE   ||
-                    parameter == ROM_UNTIL          || parameter == ROM_DOES   ||
-                    parameter == ROM_RUNS           || parameter == ROM_DO     ||
-                    parameter == ROM_BEGIN          || parameter == ROM_IF ) {
-                wordCount = 0;       // Reset Words per Line Counter
-                strBuf.append("\n"); // Start a new line
-                for(int i = 0; i < tab; i++) { // Identation
-                    strBuf.append(" ");
-                }  
+            // Check for ROM words that starts a new line
+            if (    wordCount >= MAX_WORDS_PER_LINE || cfa == ROM_THEN   ||
+                    cfa == ROM_WHILE          || cfa == ROM_REPEAT ||
+                    cfa == ROM_SEMICOLON      || cfa == ROM_LOOP   ||
+                    cfa == ROM_PLOOP          || cfa == ROM_ELSE   ||
+                    cfa == ROM_UNTIL          || cfa == ROM_DOES   ||
+                    cfa == ROM_RUNS           || cfa == ROM_DO     ||
+                    cfa == ROM_BEGIN          || cfa == ROM_IF ) {
+                    wordCount = 0;                      // Reset Words per Line Counter
+                out.append("\n");                   // Start a new line
+                for(int i = 0; i < tab; i++) {      // Do Identation
+                    out.append(" ");
+                }
             }
-            // Search parameter in Tape Vocabulary
-            String wordString = vocabularyMap.get(parameter); // search in tape vocabulary
-            // Search parameter in ROM vocabulary
-            if (wordString == null) { // word not in tape vocabulary..
-                wordString = ROM_VOC.get(parameter); // search in ROM vocabulary
+
+            // Search CFA in Dictionary
+            String wordString = fileCfaList.get(cfa);    // Search in file first..
+            if (wordString == null) {
+                wordString = ROM_CFA_LIST.get(cfa);      // ..than search in ROM
             }
-            // Check if it is a number
-            if( parameter == ROM_STK_INT || parameter == ROM_STK_FP ) {
+            // is it a Number ?
+            if( cfa == ROM_STK_INT || cfa == ROM_STK_FP ) {
                 wordString = "";
             }
-            // Check if unknow word
+            // Unknow Word ?
             if (wordString == null) {
-                wordString = String.format("[%04Xh]", parameter);
+                wordString = String.format("[%04Xh]", cfa);
             }
 
-            strBuf.append(wordString); // Append word name
-            address += 2; // point to next parameter field data
+            out.append(wordString);    // Append word name
+            address += 2;              // point to next parameter field data
 
             // Complement immediate words decoding
-            switch (parameter) {
-                case ROM_PRINT_STRING: // ."
-                    address += appendString(strBuf, address);
-                    strBuf.append("\"");
+            switch (cfa) {
+                case ROM_PRINT_STRING: // ." (string)
+                    out.append(" ");
+                    address += appendString(out, address);
+                    out.append("\"");
                     break;
-                case ROM_COMMENT: // (
-                    address += appendString(strBuf, address);
-                    strBuf.append(")");
+                case ROM_COMMENT:      // ( (comment string)
+                    out.append(" ");
+                    address += appendString(out, address);
+                    out.append(")");
                     break;
-                case ROM_STK_BYTE: // Stack Single Byte (ASCII)
-                    strBuf.append(" ").append((char) (tapeFile.getMemByte(address))); // Character
-                    address++; // drop 1 bytes
+                case ROM_STK_BYTE:     // Stack Single Byte (ASCII)
+                    out.append(" ").append((char) (tape.getMemByte(address))); // Character
+                    address++;         // drop 1 bytes
                     break;
-                case ROM_STK_INT: // Stack Integer Number (2 bytes)
-                    strBuf.append(getInt(address));
-                    address += 2; // drop 2 bytes
+                case ROM_STK_INT:      // Stack Integer Number (2 bytes)
+                    out.append(getInt(address));
+                    address += 2;      // drop 2 bytes
                     break;
-                case ROM_STK_FP: // Stack Floating Point Number (4 bytes)
-                    address += appendFloat(strBuf, address);
+                case ROM_STK_FP:       // Stack Floating Point Number (4 bytes)
+                    address += appendFloat(out, address);
                     break;
                 case ROM_DOES:
                 case ROM_RUNS:
-                    address += 5; // drop 5 bytes
+                    address += 5;      // drop 5 bytes
                     break;
-                default: // do nothing
+                default:               // do nothing
             }
             // Check for words with additional 2 byte parameter
-            if(     parameter == ROM_IF    || parameter == ROM_ELSE  ||
-                    parameter == ROM_WHILE || parameter == ROM_LOOP  ||
-                    parameter == ROM_PLOOP || parameter == ROM_UNTIL ||
-                    parameter == ROM_REPEAT ) {
+            if(     cfa == ROM_IF    || cfa == ROM_ELSE  ||
+                    cfa == ROM_WHILE || cfa == ROM_LOOP  ||
+                    cfa == ROM_PLOOP || cfa == ROM_UNTIL ||
+                    cfa == ROM_REPEAT ) {
                 address += 2; // drop 2 bytes
             }
             // Check words that starts a new line after it
-            if(     parameter == ROM_THEN         || parameter == ROM_DO      ||
-                    parameter == ROM_BEGIN        || parameter == ROM_IF      ||
-                    parameter == ROM_ELSE         || parameter == ROM_WHILE   ||
-                    parameter == ROM_LOOP         || parameter == ROM_PLOOP   ||
-                    parameter == ROM_UNTIL        || parameter == ROM_REPEAT  ||
-                    parameter == ROM_PRINT_STRING || parameter == ROM_COMMENT ||
-                    parameter == ROM_DOES         || parameter == ROM_RUNS ) {
+            if(     cfa == ROM_THEN         || cfa == ROM_DO      ||
+                    cfa == ROM_BEGIN        || cfa == ROM_IF      ||
+                    cfa == ROM_ELSE         || cfa == ROM_WHILE   ||
+                    cfa == ROM_LOOP         || cfa == ROM_PLOOP   ||
+                    cfa == ROM_UNTIL        || cfa == ROM_REPEAT  ||
+                    cfa == ROM_PRINT_STRING || cfa == ROM_COMMENT ||
+                    cfa == ROM_DOES         || cfa == ROM_RUNS ) {
                 wordCount = MAX_WORDS_PER_LINE; // Start a new line
             }
             // Check for words that increase identation after it
-            if(     parameter == ROM_DO    || parameter == ROM_BEGIN ||
-                    parameter == ROM_IF    || parameter == ROM_ELSE  ||
-                    parameter == ROM_WHILE || parameter == ROM_DOES  ||
-                    parameter == ROM_RUNS ) {
-                tab++; // increase identation
+            if(     cfa == ROM_DO    || cfa == ROM_BEGIN ||
+                    cfa == ROM_IF    || cfa == ROM_ELSE  ||
+                    cfa == ROM_WHILE || cfa == ROM_DOES  ||
+                    cfa == ROM_RUNS ) {
+                tab++;                             // increase identation
             }
-            strBuf.append(" "); // append a space between words
+            out.append(" ");                       // append a space between words
         }
-        if ((tapeFile.getMemByte(cfa - 1) & 0x40) != 0) { // bit-6 = immediate flag
-            strBuf.append("IMMEDIATE");
+        if ((tape.getMemByte(link) & 0x40) != 0) { // bit6 = immediate flag
+            out.append("IMMEDIATE");
         }
     }
 
     /**
      * Decode a String
-     * @param strBuf Output StringBuilder buffer to append the string
+     * @param out Output StringBuilder buffer to append the string
      * @param address String location
      * @return string length in bytes
      */
-    private int appendString(StringBuilder strBuf, int address) {
-        int strlen = tapeFile.getMemWord(address);  // String Length
+    private int appendString(StringBuilder out, int address) {
+        int strlen = tape.getMemWord(address);  // String Length
         address = address + 2;
         int c;
         for (int i = 0; i < strlen; i++) {
-            c = tapeFile.getMemByte(address) & 0xFF;
-            strBuf.append((char)c);
+            c = tape.getMemByte(address) & 0xFF;
+            out.append((char)c);
             address++;
         }
-        return strlen + 2;                        // return number of bytes
+        return strlen + 2;                       // return number of bytes
     }
 
     /**
@@ -390,69 +467,69 @@ public class JaVocabulary {
      * s eeeeeee mmmm mmmm   mmmm mmmm mmmm mmmm
      * s = sign, eeeeeee = exponential (offseted by 65)
      * mmmm = mantissa (6 BCD digits)
-     * @param strBuf Output StringBuilder buffer to append decoded number
+     * @param out Output StringBuilder buffer to append decoded number
      * @param address Floatinf point number structure location
      */
-    private int appendFloat(StringBuilder strBuf, int address) {
-        int loWord = tapeFile.getMemWord(address);
-        int hiWord = tapeFile.getMemWord(address + 2);
-        if ((hiWord & 0x8000) != 0) { // Negative Number
-            strBuf.append("-");
+    private int appendFloat(StringBuilder out, int address) {
+        int loWord = tape.getMemWord(address);
+        int hiWord = tape.getMemWord(address + 2);
+        if ((hiWord & 0x8000) != 0) {                     // Negative Number
+            out.append("-");
         }
 
-        int exp = ((hiWord & 0x7F00) >> 8) - 65; // Normalized Exponent
-        if((hiWord & 0x7F00) == 0) {             // special case for 0.
+        int exp = ((hiWord & 0x7F00) >> 8) - 65;          // Normalized Exponent
+        if((hiWord & 0x7F00) == 0) {                      // special case for 0.
             exp = 0;
         }
         int mantissa = ((hiWord & 0xFF) << 16) | loWord; // 6 BCD digits Mantissa
 
-        int e = 0; // Print Exponential Format: 1.23456E10
+        int e = 0;                   // Print Exponential Format: 1.23456E10
         if (exp >= -4 && exp <= 9) { // Print Normal Format: 123.456
-            e = exp; // decimal point position
-            exp = 0; // flag Not Exponential Format
+            e = exp;                 // decimal point position
+            exp = 0;                 // flag Not Exponential Format
         }
-        if(e < 0) { // print numbers like .000123
-            strBuf.append(".");
+        if(e < 0) {                  // print numbers like .000123
+            out.append(".");
             while(e < -1) {
-                strBuf.append("0");
+                out.append("0");
                 e++;
             }
-           e--; // force e = -1
+           e--;                      // force e = -1
         }
 
-        do { // print mantissa
-            strBuf.append((mantissa >> 20) & 0x0F); // print BCD digit
-            if(e == 0) { // decimal point position
-                strBuf.append(".");
+        do {                                        // print mantissa
+            out.append((mantissa >> 20) & 0x0F); // print BCD digit
+            if(e == 0) {                            // decimal point position
+                out.append(".");
             }
-            e--; // decrement decimal place
-            mantissa = (mantissa & 0xFFFFF) << 4; // roll digits
+            e--;                                    // decrement decimal place
+            mantissa = (mantissa & 0xFFFFF) << 4;   // roll digits
         } while(mantissa != 0);
-        e++; // revert last decrement during mantissa printing
+        e++;                         // revert last decrement during mantissa printing
 
-        while(e > 0) { // print trailing zeros
-            strBuf.append("0");
-            e--;  // decrement decimal place
-            if(e == 0) { // decimal point position
-                strBuf.append(".");
+        while(e > 0) {               // print trailing zeros
+            out.append("0");
+            e--;                     // decrement decimal place
+            if(e == 0) {             // decimal point position
+                out.append(".");
             }
         }
 
-        if(exp != 0) { // Print exponential value
-            strBuf.append("E").append(exp);
+        if(exp != 0) {               // Print exponential value
+            out.append("E").append(exp);
         }
         return 4;
     }
 
     /**
-     * Decode an integer number (2 bytes)
+     * Decode an signed integer number (2 bytes)
      * @param address Integer number structure location
      * @return Decoded integer number
      */
     private int getInt(int address) {
-        int number = tapeFile.getMemWord(address);
-        if ((number & 0x8000) != 0) { // if negative number..
-            number = -(1 + (number ^ 0xFFFF));  // convert
+        int number = tape.getMemWord(address);
+        if ((number & 0x8000) != 0) {            // if negative number..
+            number = -(1 + (number ^ 0xFFFF));   // ..convert
         }
         return number;
     }

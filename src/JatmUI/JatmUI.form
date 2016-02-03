@@ -383,6 +383,9 @@
                 <Property name="text" type="java.lang.String" value="Compare.."/>
                 <Property name="toolTipText" type="java.lang.String" value="Compare Selected Files"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="compareActionPerformed"/>
+              </Events>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="fixCrc">
               <Properties>

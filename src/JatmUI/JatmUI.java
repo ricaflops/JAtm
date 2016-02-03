@@ -53,8 +53,8 @@ import javax.swing.filechooser.FileFilter;
  * @author Ricardo F. Lopes
  */
 public class JatmUI extends javax.swing.JFrame {
-    public static final String version = "0.8";
-    
+    public static final String version = "0.85";
+
     List<JaTape> jaTapeList;                    // Tape Files List
     JaTapeListTableModel tapeListTableModel;    // GUI List Table
     JatmFileTap fileTap;                        // TAP tape
@@ -81,26 +81,26 @@ public class JatmUI extends javax.swing.JFrame {
             | IllegalAccessException e) {
         }
 
-        userCharSet = new CharacterSet(); 
-        
-        jatmIcon = new ImageIcon("src/JatmUI/resources/jatm.png"); // Title Icon        
+        userCharSet = new CharacterSet();
+
+        jatmIcon = new ImageIcon("src/JatmUI/resources/jatm.png"); // Title Icon
         jaTapeList = new ArrayList<>();  // List of Tape Files
         tapeListTableModel = new JaTapeListTableModel(jaTapeList); // GUI list
-        
+
         // File Load/Save Objects
         fileTap = new JatmFileTap();
         fileJac = new JatmFileJac();
         fileBin = new JatmFileBin();
         fileHex = new JatmFileHex();
         fileWav = new JatmFileWav();
-        
+
         // File Filters
         fileFilterTap = new BasicFileFilter(fileTap.getExtension(), fileTap.getDescription());
         fileFilterJac = new BasicFileFilter(fileJac.getExtension(), fileJac.getDescription());
         fileFilterBin = new BasicFileFilter(fileBin.getExtension(), fileBin.getDescription());
         fileFilterHex = new BasicFileFilter(fileHex.getExtension(), fileHex.getDescription());
         fileFilterWav = new BasicFileFilter(fileWav.getExtension(), fileWav.getDescription());
-        
+
         // File Chooser
         jatmFileChooser = new JFileChooser();
         jatmFileChooser.setFileFilter(fileFilterTap); // Default Choose
@@ -110,12 +110,12 @@ public class JatmUI extends javax.swing.JFrame {
         jatmFileChooser.addChoosableFileFilter(fileFilterWav);
 
         initComponents();
-        
+
         setTitle("JAtm - version " + version);
         setIconImage(jatmIcon.getImage());
          statusBarRightText.setText("Java runtime v" + System.getProperty("java.version"));
     }
-    
+
     // Right Text on Status Bar: shows the number of tape files in list
     private void setStatusBarLeft(int files) {
         if(files == 0) {
@@ -646,6 +646,11 @@ public class JatmUI extends javax.swing.JFrame {
         compare.setIcon(new javax.swing.ImageIcon(getClass().getResource("/JatmUI/resources/View.png"))); // NOI18N
         compare.setText("Compare..");
         compare.setToolTipText("Compare Selected Files");
+        compare.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                compareActionPerformed(evt);
+            }
+        });
         toolsMenu.add(compare);
 
         fixCrc.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F, java.awt.event.InputEvent.CTRL_MASK));
@@ -722,11 +727,11 @@ public class JatmUI extends javax.swing.JFrame {
         "No file selected",
         "Error",
         JOptionPane.ERROR_MESSAGE);
-    }    
-    
+    }
+
     private void loadFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadFileActionPerformed
         int result;
-        
+
         jatmFileChooser.setMultiSelectionEnabled(true); // Multiple files selection
 
         if(jatmFileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
@@ -735,7 +740,7 @@ public class JatmUI extends javax.swing.JFrame {
             for (File file : files) {
                 String filename = file.getName();
                 String ext = filename.substring(filename.lastIndexOf(".")+1,filename.length());
-                
+
                 JatmFile jatmFile = fileBin; // BIN file load
                 if( ext.equalsIgnoreCase(fileTap.getExtension()) ) { // TAP file load
                     jatmFile = fileTap;
@@ -748,8 +753,8 @@ public class JatmUI extends javax.swing.JFrame {
                 }
                 if( ext.equalsIgnoreCase(fileWav.getExtension()) ) { // WAV file load
                     jatmFile = fileWav;
-                } 
-                
+                }
+
                 result = jatmFile.load(file.toPath(), jaTapeList);
                 if(result <= 0) { // an error occured
                     JOptionPane.showMessageDialog(this,
@@ -758,9 +763,9 @@ public class JatmUI extends javax.swing.JFrame {
                             JOptionPane.ERROR_MESSAGE);
                     break;
                 } else {
-                    
+
                 }
-            }          
+            }
             tapeListTableModel.fireTableDataChanged(); // refresh table draw
             this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         }
@@ -770,8 +775,8 @@ public class JatmUI extends javax.swing.JFrame {
     private void exitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitActionPerformed
         if(!jaTapeList.isEmpty()) {
             int action;
-            action = JOptionPane.showConfirmDialog(this, 
-                    "Do you really want to quit?", 
+            action = JOptionPane.showConfirmDialog(this,
+                    "Do you really want to quit?",
                     "Confirm Exit",
                     JOptionPane.OK_CANCEL_OPTION);
             if(action != JOptionPane.OK_OPTION) {
@@ -788,7 +793,7 @@ public class JatmUI extends javax.swing.JFrame {
             +" - version " + version
             +"<br>www.jupiter-ace.co.uk</a>"
             +"<p><hr>Copyright \u00a9 2015-2016  Ricardo Fernandes Lopes</p>"
-              
+
     +"<p><br>This program is free software: you can redistribute it and/or modify"
     +"<br>it under the terms of the GNU General Public License as published by"
     +"<br>the Free Software Foundation, either version 3 of the License, or"
@@ -800,12 +805,12 @@ public class JatmUI extends javax.swing.JFrame {
     +"<br>See the GNU General Public License for more details.</p>"
 
     +"<p><br>You should have received a copy of the <b>GNU General Public License</b>"
-    +"<br>along with this program.  If not, see http://www.gnu.org/licenses/</p>"              
-                
+    +"<br>along with this program.  If not, see http://www.gnu.org/licenses/</p>"
+
             +"<p><br>JAtm includes or uses:"
             +"<ul> <li>Silk Icon Set http://www.famfamfam.com/lab/icon/</li></ul></p></html>",
             "About JAtm",
-            JOptionPane.INFORMATION_MESSAGE, icon);       
+            JOptionPane.INFORMATION_MESSAGE, icon);
     }//GEN-LAST:event_aboutActionPerformed
 
     private void editNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editNameActionPerformed
@@ -819,7 +824,7 @@ public class JatmUI extends javax.swing.JFrame {
                 tape.setFilename(result);
                 tape.fixCrc();
                 tapeListTable.updateUI();
-            }        
+            }
         } else { // Abort if no user selection
             msgNoSelectionError();
         }
@@ -829,7 +834,7 @@ public class JatmUI extends javax.swing.JFrame {
         int[] selection = tapeListTable.getSelectedRows(); // Selection list
         int row;
         JaTape tape;
-        
+
         if(selection.length > 0) { // Check if anything is selected
             if(selection[0] > 0) { // Check first row selection
                 for (int i=0; i<selection.length; i++) { // move up all selection
@@ -840,7 +845,7 @@ public class JatmUI extends javax.swing.JFrame {
                     jaTapeList.set(row-1, tape ); // place object in new position
                 }
                 tapeListTable.clearSelection();
-                tapeListTableModel.fireTableDataChanged(); // refresh table draw 
+                tapeListTableModel.fireTableDataChanged(); // refresh table draw
                 for(int i=0; i<selection.length; i++) { // Update selection in new position
                     row = selection[i];
                     tapeListTable.addRowSelectionInterval(row, row);
@@ -848,14 +853,14 @@ public class JatmUI extends javax.swing.JFrame {
             }
         } else {
             msgNoSelectionError(); // No files selected Error
-        } 
+        }
     }//GEN-LAST:event_moveUpActionPerformed
 
     private void clearListActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearListActionPerformed
         if(jaTapeList.size()>0) {
             int action;
-            action = JOptionPane.showConfirmDialog(this, 
-                    "Do you really want to clear all list?", 
+            action = JOptionPane.showConfirmDialog(this,
+                    "Do you really want to clear all list?",
                     "Confirm Clear",
                     JOptionPane.OK_CANCEL_OPTION);
             if(action == JOptionPane.OK_OPTION) {
@@ -894,7 +899,7 @@ public class JatmUI extends javax.swing.JFrame {
         int[] selection = tapeListTable.getSelectedRows(); // Selection list
         int row;
         JaTape tape;
-        
+
         if(selection.length > 0) { // Check if anything is selected
             if(selection[selection.length-1] < jaTapeList.size()-1) { // Check last row selection
                 for (int i=selection.length-1; i >= 0; i--) { // MOve All selection down
@@ -913,14 +918,14 @@ public class JatmUI extends javax.swing.JFrame {
             }
         } else {
             msgNoSelectionError(); // No files selected Error
-        }        
+        }
     }//GEN-LAST:event_moveDownActionPerformed
 
     private void moveTopActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_moveTopActionPerformed
         int[] selection = tapeListTable.getSelectedRows(); // Selection list
         int row;
         JaTape tape;
-        
+
         if(selection.length > 0) { // Check if anything is selected
             int firstSelection = selection[0];
             if(firstSelection > 0) { // Check first row selection
@@ -944,14 +949,14 @@ public class JatmUI extends javax.swing.JFrame {
             }
         } else {
             msgNoSelectionError(); // No files selected Error
-        } 
+        }
     }//GEN-LAST:event_moveTopActionPerformed
 
     private void moveBottomActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_moveBottomActionPerformed
         int[] selection = tapeListTable.getSelectedRows(); // Selection list
         int row;
         JaTape tape;
-        
+
         if(selection.length > 0) { // Check if anything is selected
             int lastSelection = selection[selection.length-1];
             if(lastSelection < jaTapeList.size()-1) { // Check last row selection
@@ -975,12 +980,12 @@ public class JatmUI extends javax.swing.JFrame {
             }
         } else {
             msgNoSelectionError(); // No files selected Error
-        } 
+        }
     }//GEN-LAST:event_moveBottomActionPerformed
 
     private void removeItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeItemActionPerformed
         int[] selection = tapeListTable.getSelectedRows(); // Selection list
-       
+
         if(selection.length > 0) { // Check if anything is selected
             for (int row=selection.length-1; row>=0; row--) {
                 jaTapeList.remove(selection[row]); // delete selected rows
@@ -999,7 +1004,7 @@ public class JatmUI extends javax.swing.JFrame {
             msgNoSelectionError();
             return;
         }
-        
+
         jatmFileChooser.setMultiSelectionEnabled(false);
         jatmFileChooser.setSelectedFile(new File("")); // no default filename
 
@@ -1046,7 +1051,7 @@ public class JatmUI extends javax.swing.JFrame {
 
         JatmFile jatmFile = null;
         Boolean isMultiTapeFile = false; // File Format accepts more than one tape
-        
+
         if( ext.equalsIgnoreCase(fileTap.getExtension()) ) { // TAP file save
             jatmFile = fileTap;
             isMultiTapeFile = true;
@@ -1071,7 +1076,7 @@ public class JatmUI extends javax.swing.JFrame {
                 this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                 jatmFile.save(path, jaTapeList, selection);
                 this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-            } else { // Multiple Tape files not allowed with selected tape format 
+            } else { // Multiple Tape files not allowed with selected tape format
                 JOptionPane.showMessageDialog(this,
                         "File Format: ."+ext
                                 +"\ndo not accept multiple tape files",
@@ -1093,7 +1098,7 @@ public class JatmUI extends javax.swing.JFrame {
             JaTape tape = jaTapeList.get( selection[0] );
             ViewCharacterSetDialog dialog;
             dialog = new ViewCharacterSetDialog(this, true, tape.getData(), 0, userCharSet, tape.getFilename());
-            dialog.setVisible(true);            
+            dialog.setVisible(true);
         } else { // No files selected to save
             msgNoSelectionError();
         }
@@ -1106,7 +1111,7 @@ public class JatmUI extends javax.swing.JFrame {
             JaTape tape = jaTapeList.get( selection[0] );
             ViewScreenDialog dialog;
             dialog = new ViewScreenDialog(this,true,tape.getData(),userCharSet,tape.getFilename());
-            dialog.setVisible(true);           
+            dialog.setVisible(true);
         } else { // No files selected to save
             msgNoSelectionError();
         }
@@ -1184,22 +1189,39 @@ public class JatmUI extends javax.swing.JFrame {
         if(selection.length > 0) {
             JaTape tape;
             for (int row = 0; row < selection.length; row++) {
-                
+
                 tape = new JaTape(jaTapeList.get( selection[row] )); // create a copy
                 jaTapeList.add(tape); // append to list end
             }
             tapeListTable.clearSelection();
             tapeListTableModel.fireTableDataChanged(); // refresh table draw
-            setStatusBarLeft(jaTapeList.size()); // Update Status Bar                      
+            setStatusBarLeft(jaTapeList.size()); // Update Status Bar
         } else { // Abort if no selection
             msgNoSelectionError();
         }
     }//GEN-LAST:event_duplicateActionPerformed
 
+    private void compareActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_compareActionPerformed
+        int[] selection = tapeListTable.getSelectedRows();    // Get User Selection
+        if(selection.length == 2 ) {
+            CompareDialog dialog;
+            dialog = new CompareDialog(this,true);
+            JaTape t1 = jaTapeList.get(selection[0]);
+            JaTape t2 = jaTapeList.get(selection[1]);
+            dialog.compare(t1,t2);
+            dialog.setVisible(true);
+        } else { // Abort if no selection
+            JOptionPane.showMessageDialog(this,
+                "Select exactly 2 files for comparison!",
+                "Compare Error",
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_compareActionPerformed
+
     /**
      * @param args the command line arguments
      */
-    
+
     public static void main(String args[]) {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {

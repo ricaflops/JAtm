@@ -35,7 +35,7 @@ public class JaTape {
     public static final byte BYT_FILE     = (byte) 0x20;
 
     /**
-     * Header Parameter Index 
+     * Header Parameter Index
      * to be used with getParameter and setParameter methods
      */
     public static final int BLOCK_TYPE =  0; // 1 byte
@@ -49,31 +49,31 @@ public class JaTape {
     public static final int VOCLNK     = 22; // 2 bytes
     public static final int STKBOT     = 24; // 2 bytes
     public static final int CRC        = 26; // 1 byte
-   
+
     /**
      * Header Block Size in Bytes
      */
     public static final int HEADER_LENGTH = 27; // Header Block Size
-    
+
     private final JaTapeBlock header;
     private final JaTapeBlock data;
     private int baseAddress;
-    
+
     /**
      * Constructor: Empty Tape File
      */
     public JaTape() {
         this(new byte[HEADER_LENGTH], new byte[2]);
     }
-    
+
     /**
      * Copy Constructor
-     * @param tape 
+     * @param tape
      */
      public JaTape(JaTape tape) {
         this(tape.getHeaderBlock(), tape.getDataBlock());
     }
-    
+
     /**
      * Constructor: Tape File from header and data blocks
      * @param hdr header block byte array
@@ -92,13 +92,13 @@ public class JaTape {
 
     /**
      * Set a whole data block array, including block type and CRC bytes
-     * @param block data block 
+     * @param block data block
      */
     public void setDataBlock(byte[] block) {
         data.set(block);
 
     }
-    
+
     /**
      * Get the whole data block array, including block type and CRC bytes
      * @return data block
@@ -114,7 +114,7 @@ public class JaTape {
     public byte[] getData() {
         return data.getPart(1,data.length()-2);
     }
-    
+
     /**
      * Set byte value to a Data block position
      * @param index position in Data block array (excluding block type byte)
@@ -123,7 +123,7 @@ public class JaTape {
     public void setDataByte(int index, byte b) {
         data.setByte(index+1,b); // skip block type byte
     }
- 
+
     /**
      * Get byte value from Data block position
      * @param index position in Data block array (excluding block type byte)
@@ -149,7 +149,7 @@ public class JaTape {
      */
     public int getDataWord(int index) {
         return data.getWord(index+1); // skip block type byte
-    }    
+    }
 
     /**
      * Set the Header block from a byte array
@@ -160,7 +160,7 @@ public class JaTape {
         byte[] h = new byte[HEADER_LENGTH];
         int len = (h.length > b.length)?b.length:h.length;
         System.arraycopy(h, 0, b, 0, len);
-        
+
         header.set(h);
         baseAddress = getParameter(JaTape.ADDRESS); // file base address
     }
@@ -175,10 +175,10 @@ public class JaTape {
 
     /**
      * Set Header Parameters to a canonical Byt file type
-     */    
+     */
     public void makeByt() {
         header.setType(JaTapeBlock.HEADER_BLOCK);
-        
+
         header.setByte(FILE_TYPE, BYT_FILE);
         header.setWord(CURR_WRD, 0x2020);
         header.setWord(CURRENT, 0x2020);
@@ -186,13 +186,13 @@ public class JaTape {
         header.setWord(VOCLNK, 0x2020);
         header.setWord(STKBOT, 0x2020);
     }
- 
+
     /**
      * Set Header Parameters to a canonical Dict file type
      */
     public void makeDict() {
         header.setType(JaTapeBlock.HEADER_BLOCK);
-        
+
         header.setByte(FILE_TYPE, DICT_FILE);
         header.setWord(ADDRESS, 0x3C51);
         header.setWord(CURRENT, 0x3C4C);
@@ -210,13 +210,25 @@ public class JaTape {
     }
 
     /**
+     * get file type string
+     * @return file type as a String "dict" or " byt"
+     */
+    public String getFileType() {
+        if(isDict()) {
+            return "dict";
+        } else {
+            return " byt";
+        }
+    }
+
+    /**
      * Set file type: Dict or Byt
      * @param type File type byte
      */
     public void setType(byte type) {
         header.setByte(FILE_TYPE, type);
-    }    
-    
+    }
+
     /**
      * Get File name
      * @return file name string
@@ -224,10 +236,10 @@ public class JaTape {
     public String getFilename() {
         return header.getString(FILE_NAME, 10);
     }
- 
+
     /**
      * Set the File name (max 10 characters)
-     * @param filename 
+     * @param filename
      */
     public void setFilename(String filename) {
         filename = filename + "          "; // Pad with Spaces
@@ -251,12 +263,12 @@ public class JaTape {
      */
     public void setParameter(int index, int parameter) {
         header.setWord(index, parameter);
-    }  
+    }
 
     /**
      * Check if Header and Data blocks CRC's are correct
      * @return True if Header and Data blocks CRC's are ok
-     */    
+     */
     public Boolean crcOk() {
         return (header.crcOk() && data.crcOk());
     }
@@ -268,7 +280,7 @@ public class JaTape {
     public Boolean headerCrcOk() {
         return header.crcOk();
     }
-    
+
     /**
      * Check if Data block CRC is correct
      * @return True if Data block CRC is ok
@@ -276,7 +288,7 @@ public class JaTape {
     public Boolean dataCrcOk() {
         return data.crcOk();
     }
-    
+
     /**
      * Calculate and set correct Header and Data blocks CRC bytes
      */
@@ -284,14 +296,14 @@ public class JaTape {
         header.fixCrc();
         data.fixCrc();
     }
-    
+
     /**
      * Calculate and set a correct Header block CRC byte
      */
     public void fixHeaderCrc() {
         header.fixCrc();
     }
-    
+
     /**
      * Calculate and set a correct Data block CRC byte
      */
@@ -306,7 +318,7 @@ public class JaTape {
     public byte getHeaderCrc() {
         return header.getCrc();
     }
-    
+
     /**
      * Get Data block CRC byte
      * @return Data block CRC byte
@@ -314,23 +326,23 @@ public class JaTape {
     public byte getDataCrc() {
         return data.getCrc();
     }
-    
+
     /**
      * Set Header block CRC byte
-     * @param crc 
+     * @param crc
      */
     public void setHeaderCrc(byte crc) {
         header.setCrc(crc);
     }
-    
+
     /**
      * Set Data block CRC byte
-     * @param crc 
+     * @param crc
      */
     public void setDataCrc(byte crc) {
         data.setCrc(crc);
     }
-    
+
     /**
      * Check for a valid file address
      * @param address Address to be checked
@@ -340,7 +352,7 @@ public class JaTape {
         return (address >= baseAddress)
                 && (address < baseAddress + getParameter(JaTape.LENGTH));
     }
-    
+
     /**
      * Get byte from memory address. Returns Zero if invalid address
      * @param address byte location
@@ -363,5 +375,5 @@ public class JaTape {
             return getDataWord(address - baseAddress);
         }
         return 0;
-    }     
+    }
 }

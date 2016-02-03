@@ -1,0 +1,195 @@
+/*
+ * Copyright (C) 2016 Ricardo
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package JatmUI;
+
+import Jatm.JaTape;
+
+/**
+ *
+ * @author Ricardo
+ */
+public class CompareDialog extends javax.swing.JDialog {
+
+    /**
+     * Creates new form CompareDialog
+     */
+    public CompareDialog(java.awt.Frame parent, boolean modal) {
+        super(parent, modal);
+        initComponents();
+    }
+
+    public void compare(JaTape t1, JaTape t2) {
+        String s1 = t1.getFilename();
+        String s2 = t2.getFilename();
+        if(s1 == null ? s2 != null : !s1.equals(s2)) {
+            compareTextArea.append("#");
+        } else {
+            compareTextArea.append(" ");    
+        }
+        compareTextArea.append(String.format("      File Name: %s\t%s\n", s1, s2));
+
+        s1 = t1.getFileType();
+        s2 = t2.getFileType();
+        if(s1 == null ? s2 != null : !s1.equals(s2)) {
+            compareTextArea.append("#");
+        } else {
+            compareTextArea.append(" ");    
+        }
+        compareTextArea.append(String.format("      File Type: %s\t\t%s\n", s1, s2 ));
+        
+        int x1 = t1.getParameter(JaTape.LENGTH);
+        int x2 = t2.getParameter(JaTape.LENGTH);
+        if(x1 != x2) {
+            compareTextArea.append("#");
+        } else {
+            compareTextArea.append(" ");    
+        }
+        compareTextArea.append(String.format("      File Size: %5d\t\t%5d\n", x1, x2));
+        
+        x1 = t1.getParameter(JaTape.ADDRESS);
+        x2 = t2.getParameter(JaTape.ADDRESS);
+        if(x1 != x2) {
+            compareTextArea.append("#");
+        } else {
+            compareTextArea.append(" ");    
+        }
+        compareTextArea.append(String.format("        Address: %4Xh\t\t%4Xh\n", x1, x2));
+
+        x1 = t1.getParameter(JaTape.CURR_WRD);
+        x2 = t2.getParameter(JaTape.CURR_WRD);
+        if(x1 != x2) {
+            compareTextArea.append("#");
+        } else {
+            compareTextArea.append(" ");    
+        }
+        compareTextArea.append(String.format("   Current Word: %4Xh\t\t%4Xh\n", x1, x2));
+
+        x1 = t1.getParameter(JaTape.CURRENT);
+        x2 = t2.getParameter(JaTape.CURRENT);
+        if(x1 != x2) {
+            compareTextArea.append("#");
+        } else {
+            compareTextArea.append(" ");    
+        }
+        compareTextArea.append(String.format("        CURRENT: %4Xh\t\t%4Xh\n", x1, x2 ));  
+
+        x1 = t1.getParameter(JaTape.CONTEXT);
+        x2 = t2.getParameter(JaTape.CONTEXT);
+        if(x1 != x2) {
+            compareTextArea.append("#");
+        } else {
+            compareTextArea.append(" ");    
+        }
+        compareTextArea.append(String.format("        CONTEXT: %4Xh\t\t%4Xh\n", x1, x2 ));
+
+        x1 = t1.getParameter(JaTape.VOCLNK);
+        x2 = t2.getParameter(JaTape.VOCLNK);
+        if(x1 != x2) {
+            compareTextArea.append("#");
+        } else {
+            compareTextArea.append(" ");    
+        }
+        compareTextArea.append(String.format("         VOCLNK: %4Xh\t\t%4Xh\n", x1, x2 ));
+
+        x1 = t1.getParameter(JaTape.STKBOT);
+        x2 = t2.getParameter(JaTape.STKBOT);
+        if(x1 != x2) {
+            compareTextArea.append("#");
+        } else {
+            compareTextArea.append(" ");    
+        }
+        compareTextArea.append(String.format("   Stack Bottom: %4Xh\t\t%4Xh\n", x1, x2));
+        
+        compareTextArea.append("\nBlocks Similarity: Header\tData\n");
+        compareTextArea.append(String.format("                   %.1f%%\t%.1f%%",
+                compareBlocks(t1.getHeaderBlock(),t2.getHeaderBlock()),
+                compareBlocks(t1.getDataBlock(),t2.getDataBlock()) ));
+    }
+    
+    private double compareBlocks(byte[] b1, byte[] b2) {
+        int size1 = b1.length;
+        int size2 = b2.length;
+        int equalities = 0; // similarities counter
+        int smallestSize = (size1<size2)?size1:size2; // smallest size
+        int largestSize = (size1>size2)?size1:size2; // largest size
+        for(int i=0; i < smallestSize; i++) {
+            if(b1[i] == b2[i]) { // count equalities
+                equalities++;
+            }
+        }
+        return 100.0 * (double)equalities / (double)largestSize ;
+    }
+    
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        compareScrollPane = new javax.swing.JScrollPane();
+        compareTextArea = new javax.swing.JTextArea();
+        closeButton = new javax.swing.JButton();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Compare Files");
+
+        compareTextArea.setColumns(20);
+        compareTextArea.setRows(5);
+        compareScrollPane.setViewportView(compareTextArea);
+
+        closeButton.setText("Close");
+        closeButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                closeButtonActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(compareScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(closeButton)
+                .addContainerGap())
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(compareScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 273, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(closeButton)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void closeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_closeButtonActionPerformed
+        dispose();
+    }//GEN-LAST:event_closeButtonActionPerformed
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton closeButton;
+    private javax.swing.JScrollPane compareScrollPane;
+    private javax.swing.JTextArea compareTextArea;
+    // End of variables declaration//GEN-END:variables
+}
